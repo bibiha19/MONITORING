@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MONITORING SELISIH KAS LEBIH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#E8EEF2; --surface:#FFFFFF; --surface-2:#F3F6F8; --ink:#0D2231; --muted:#566B7C; --line:#D4DEE5;
+  --brand:#0B5F78; --brand-deep:#06384A; --on-brand:#FFFFFF; --focus:#0A86AB;
+  --ok:#1C9A68; --ok-bg:#DFF3EA; --on-ok:#FFFFFF;
+  --warn:#DDA000; --warn-bg:#FFF1CC; --on-warn:#2A1E00;
+  --bad:#D23F4A; --bad-bg:#FBE3E5; --on-bad:#FFFFFF;
+  --neutral:#93A3B1; --neutral-bg:#E9EEF2;
+  --s1:#0B5F78; --s2:#1BB3A6; --s3:#E0A100; --s4:#D23F4A; --s5:#7A5AF8; --s6:#8796A5;
+  --pop:0 2px 4px rgba(13,34,49,.08),0 18px 40px -12px rgba(13,34,49,.28);
+  --head:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --body:'Figtree',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#08141C; --surface:#0F202B; --surface-2:#13293A; --ink:#E7EFF5; --muted:#8CA3B5; --line:#203849;
+    --brand:#3AB4D2; --brand-deep:#0A2B3A; --on-brand:#04222D; --focus:#5CCBE6;
+    --ok:#3FC58F; --ok-bg:#12372B; --on-ok:#04251A;
+    --warn:#F0B93A; --warn-bg:#3A2F10; --on-warn:#2A1E00;
+    --bad:#F26771; --bad-bg:#40191E; --on-bad:#2B0A0D;
+    --neutral:#6F8394; --neutral-bg:#1A2F3E;
+    --s1:#3AB4D2; --s2:#35D0BF; --s3:#F0B93A; --s4:#F26771; --s5:#A18BFF; --s6:#7F93A4;
+    --pop:0 2px 4px rgba(0,0,0,.4),0 18px 40px -12px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#08141C; --surface:#0F202B; --surface-2:#13293A; --ink:#E7EFF5; --muted:#8CA3B5; --line:#203849;
+  --brand:#3AB4D2; --brand-deep:#0A2B3A; --on-brand:#04222D; --focus:#5CCBE6;
+  --ok:#3FC58F; --ok-bg:#12372B; --on-ok:#04251A;
+  --warn:#F0B93A; --warn-bg:#3A2F10; --on-warn:#2A1E00;
+  --bad:#F26771; --bad-bg:#40191E; --on-bad:#2B0A0D;
+  --neutral:#6F8394; --neutral-bg:#1A2F3E;
+  --s1:#3AB4D2; --s2:#35D0BF; --s3:#F0B93A; --s4:#F26771; --s5:#A18BFF; --s6:#7F93A4;
+  --pop:0 2px 4px rgba(0,0,0,.4),0 18px 40px -12px rgba(0,0,0,.7);
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);color-scheme:light dark}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2.5px solid var(--focus);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1360px;margin:0 auto;padding:0 24px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Header ---------- */
+.top{position:relative;color:#fff;background:linear-gradient(115deg,var(--brand-deep) 0%,#0A4E66 55%,var(--brand) 140%);padding:26px 0 62px}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:9px;
+  background:radial-gradient(circle at 7px 9px,var(--bg) 5.2px,transparent 5.8px) 0 0/14px 9px repeat-x}
+.top-in{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px;min-width:0;flex:1 1 380px}
+.mark{flex:none;width:48px;height:48px;border-radius:13px;background:rgba(255,255,255,.12);display:grid;place-items:center;border:1px solid rgba(255,255,255,.22)}
+h1{font:700 clamp(22px,3vw,30px)/1.1 var(--head);margin:0;letter-spacing:-.01em}
+.sub{margin:5px 0 0;font-size:13.5px;color:rgba(255,255,255,.78);display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center}
+.linkbtn{background:none;border:0;padding:0;color:#fff;text-decoration:underline;text-underline-offset:3px;font-size:13.5px}
+.actions{display:flex;gap:10px;align-items:center;position:relative;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:11px;padding:10px 16px;font-weight:600;font-size:14px;border:1px solid transparent;line-height:1.1;white-space:nowrap}
+.btn svg{flex:none}
+.btn.ghost{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35);color:#fff}
+.btn.ghost:hover{background:rgba(255,255,255,.2)}
+.btn.solid{background:#fff;color:#06384A}
+.btn.solid:hover{background:#E6F4F8}
+.btn.icon{padding:10px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35);color:#fff}
+.btn.icon:hover{background:rgba(255,255,255,.2)}
+.btn.primary{background:var(--brand);color:var(--on-brand)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.line{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.btn.line:hover{background:var(--surface-2)}
+.menu{position:absolute;right:0;top:calc(100% + 8px);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:var(--pop);padding:6px;min-width:290px;z-index:60}
+.menu[hidden]{display:none}
+.menu button{display:flex;width:100%;text-align:left;gap:12px;align-items:flex-start;background:none;border:0;border-radius:8px;padding:10px 12px}
+.menu button:hover{background:var(--surface-2)}
+.menu b{display:block;font-weight:600;font-size:14px}
+.menu span{display:block;font-size:12.5px;color:var(--muted)}
+
+/* ---------- Filters ---------- */
+.filters{position:relative;z-index:30;margin-top:-34px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--pop);padding:16px 18px;
+  display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px 14px;align-items:end}
+.f-branch{grid-column:span 3}.f-term{grid-column:span 4}.f-akhir{grid-column:span 5}.f-tipe{grid-column:span 3}
+.f-from,.f-to{grid-column:span 2}.f-q{grid-column:span 3}.f-reset{grid-column:span 2}
+.fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fld>label,.fld>.lab{font-size:12.5px;color:var(--muted);font-weight:500}
+.inp{width:100%;height:40px;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:0 12px;outline-offset:1px}
+.inp:hover{border-color:var(--neutral)}
+select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%2393A3B1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.seg-ctl{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;height:40px}
+.seg-ctl button{border:0;background:none;border-radius:7px;padding:0 11px;font-size:13.5px;font-weight:500;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.seg-ctl button:hover{color:var(--ink)}
+.seg-ctl button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px var(--line);font-weight:600}
+.seg-ctl i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.seg-ctl small{font-size:12px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;min-height:0}
+.chip{display:inline-flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 8px 5px 13px;font-size:13px}
+.chip button{border:0;background:var(--neutral-bg);border-radius:50%;width:20px;height:20px;line-height:1;display:grid;place-items:center;color:var(--muted);padding:0}
+.chip button:hover{background:var(--bad-bg);color:var(--bad)}
+
+/* ---------- Panels ---------- */
+main{padding:18px 0 40px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.ph h3{font:600 18px/1.2 var(--head);margin:0;letter-spacing:-.005em}
+.ph p{margin:3px 0 0;font-size:13px;color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;margin-top:16px}
+.c8{grid-column:span 8}.c7{grid-column:span 7}.c5{grid-column:span 5}.c4{grid-column:span 4}.c12{grid-column:span 12}
+.stack{display:flex;flex-direction:column;gap:16px}
+.empty{padding:36px 12px;text-align:center;color:var(--muted);font-size:14px}
+
+/* hero */
+.hero{padding:28px 28px 24px}
+.hero h2{font:700 clamp(24px,3.1vw,36px)/1.14 var(--head);letter-spacing:-.018em;margin:0;max-width:40ch}
+.hero .lead{margin:10px 0 0;color:var(--muted);font-size:15px;max-width:68ch}
+.bar{display:flex;gap:4px;height:52px;margin-top:24px}
+.bar .sg{border:0;min-width:10px;border-radius:9px;display:flex;align-items:center;justify-content:center;font:700 17px/1 var(--head);transition:opacity .2s,transform .2s;position:relative;padding:0}
+.bar .sg:hover{transform:translateY(-2px)}
+.bar .sg.dim{opacity:.28}
+.bar.anim .sg{transform-origin:left;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+.bar.anim .sg:nth-child(2){animation-delay:.12s}.bar.anim .sg:nth-child(3){animation-delay:.24s}
+@keyframes grow{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
+.hl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.hl button{text-align:left;background:none;border:1px solid transparent;border-radius:12px;padding:10px 12px;display:grid;gap:2px}
+.hl button:hover{background:var(--surface-2)}
+.hl button[aria-pressed="true"]{border-color:var(--line);background:var(--surface-2)}
+.hl .nm{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
+.hl .nm i{width:10px;height:10px;border-radius:3px}
+.hl .vl{font:700 clamp(19px,1.9vw,25px)/1.2 var(--head);letter-spacing:-.012em;white-space:nowrap}
+.hl .vl small{font:500 13px var(--body);color:var(--muted);margin-left:6px}
+.hl .rp{font-size:13px;color:var(--muted)}
+.tot-line{display:flex;justify-content:space-between;align-items:baseline;gap:8px 20px;flex-wrap:wrap;margin-top:12px;padding:14px 12px 0;border-top:1px solid var(--line)}
+.tot-line .l{font-size:13.5px;color:var(--muted)}
+.tot-line .v{font:700 clamp(20px,2.2vw,28px)/1.2 var(--head);letter-spacing:-.012em}
+.tot-line .v small{font:500 13px var(--body);color:var(--muted);margin-left:8px;letter-spacing:0}
+.dt tfoot td{position:sticky;bottom:0;z-index:2;background:var(--surface-2);font-weight:600;border-top:1px solid var(--line);border-bottom:0;padding:11px 12px}
+.dt tfoot .sm{font-weight:500;color:var(--muted)}
+.dt tfoot .sm b{color:var(--ink);font-weight:700}
+
+/* strip */
+.strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:6px 0}
+.st{padding:14px 20px;border-left:1px solid var(--line);min-width:0}
+.st:first-child{border-left:0}
+.st .l{font-size:13px;color:var(--muted)}
+.st .v{font:700 26px/1.2 var(--head);margin:3px 0 2px;letter-spacing:-.01em}
+.st .n{font-size:12.5px;color:var(--muted);line-height:1.35}
+.st.alert .v{color:var(--bad)}
+
+/* donut */
+.donut-wrap{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.donut{flex:none;position:relative;width:176px;height:176px}
+.donut svg{display:block}
+.donut .ctr{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}
+.donut .ctr b{display:block;font:700 30px/1 var(--head);margin-bottom:3px}
+.donut .ctr span{display:block;font-size:12.5px;color:var(--muted)}
+.ring{cursor:pointer;transition:opacity .2s}
+.dleg{flex:1 1 200px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.dleg button{display:grid;grid-template-columns:12px 1fr auto auto;gap:10px;align-items:center;background:none;border:1px solid transparent;border-radius:9px;padding:7px 9px;text-align:left;font-size:13.5px}
+.dleg button:hover{background:var(--surface-2)}
+.dleg button[aria-pressed="true"]{background:var(--surface-2);border-color:var(--line)}
+.dleg i{width:12px;height:12px;border-radius:4px}
+.dleg .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dleg .ct{font-weight:700}
+.dleg .pc{color:var(--muted);font-size:12.5px;min-width:42px;text-align:right}
+
+/* matrix */
+.mx{width:100%;border-collapse:separate;border-spacing:4px;font-size:13.5px;table-layout:fixed}
+.mx th{font-weight:500;color:var(--muted);font-size:12.5px;text-align:center;padding:2px}
+.mx th.rh{text-align:right;padding-right:8px;width:76px}
+.mx td{padding:0}
+.mx button{width:100%;height:54px;border-radius:9px;border:1px solid var(--line);background:color-mix(in srgb,var(--brand) calc(var(--k,0)*62%),var(--surface));display:grid;place-content:center;line-height:1.1;font-weight:700;font-size:17px;font-family:var(--head)}
+.mx button small{font:500 11px var(--body);color:var(--muted);display:block;margin-top:2px}
+.mx button:hover{border-color:var(--brand)}
+.mx button[aria-pressed="true"]{outline:2.5px solid var(--ink);outline-offset:1px}
+.mx button.risk{border:1.5px solid var(--bad);background:color-mix(in srgb,var(--bad) calc(var(--k,0)*28% + 8%),var(--surface))}
+.mx .tot{font-size:12.5px;color:var(--muted);text-align:center}
+.note{margin:12px 0 0;font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:flex-start}
+.note i{flex:none;width:10px;height:10px;border:1.5px solid var(--bad);border-radius:3px;margin-top:5px;background:var(--bad-bg)}
+
+/* hbars */
+.hb{display:flex;flex-direction:column;gap:2px}
+.hb button,.hb .row{display:grid;grid-template-columns:minmax(120px,210px) 1fr auto;gap:14px;align-items:center;background:none;border:1px solid transparent;border-radius:10px;padding:7px 10px;text-align:left;width:100%}
+.hb button:hover{background:var(--surface-2)}
+.hb button[aria-pressed="true"]{background:var(--surface-2);border-color:var(--line)}
+.hb .t1{font-weight:600;font-size:13.5px;line-height:1.25}
+.hb .t2{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hb .lbl{min-width:0}
+.hb .trk{height:12px;background:var(--surface-2);border-radius:6px;display:flex;overflow:hidden;gap:1.5px}
+.hb .trk span{display:block;height:100%}
+.hb .num{font-weight:700;font-size:14px;text-align:right;min-width:78px;line-height:1.25}
+.hb .num small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.hb.plain .row{grid-template-columns:minmax(110px,150px) 1fr 48px}
+.hb.plain .trk span{background:var(--brand);border-radius:6px}
+
+/* table */
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tw{overflow:auto;max-height:640px;border:1px solid var(--line);border-radius:12px}
+table.dt{border-collapse:collapse;width:100%;min-width:1040px;font-size:13.5px}
+.dt th{position:sticky;top:0;z-index:2;background:var(--surface-2);text-align:left;font-weight:600;font-size:12.5px;color:var(--muted);padding:0;border-bottom:1px solid var(--line);white-space:nowrap}
+.dt th button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:5px;padding:11px 12px;width:100%}
+.dt th button:hover{color:var(--ink)}
+.dt th button:focus-visible{outline:2.5px solid var(--focus);outline-offset:-3px}
+.dt th.r button{justify-content:flex-end}
+.dt td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+.dt tbody tr{cursor:pointer}
+.dt tbody tr:hover td{background:var(--surface-2)}
+.dt tbody tr:focus-visible{outline:2.5px solid var(--focus);outline-offset:-3px}
+.dt td.r{text-align:right;font-weight:600}
+.dt .t-id{font-weight:600}
+.dt .t-nm{font-size:12px;color:var(--muted);max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dt .tm{color:var(--muted);font-size:12px}
+.dot{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--neutral);flex:none}
+.dot.ok::before{background:var(--ok)}.dot.bad::before{background:var(--bad)}.dot.warn::before{background:var(--warn)}
+.pill{display:inline-block;padding:3px 11px;border-radius:999px;font-size:12.5px;font-weight:600}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.neutral{background:var(--neutral-bg);color:var(--muted)}
+:root:not([data-theme="dark"]) .pill.warn{color:#8A6400}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.warn{color:var(--warn)}}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;font-size:13.5px;color:var(--muted)}
+.pager .grp{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pager .btn{padding:8px 13px}
+.pager .btn[disabled]{opacity:.45;cursor:default}
+.pager select.inp{height:36px;width:auto;padding-right:30px}
+
+/* overlays */
+.scrim{position:fixed;inset:0;background:rgba(5,18,26,.5);z-index:80;backdrop-filter:blur(2px)}
+.scrim[hidden]{display:none}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--surface);z-index:90;box-shadow:var(--pop);display:flex;flex-direction:column;transform:translateX(102%);transition:transform .28s cubic-bezier(.2,.8,.2,1);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer.open{transform:none}
+.dh{padding:20px 22px 16px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.dh h3{font:700 20px/1.2 var(--head);margin:0}
+.dh p{margin:3px 0 0;font-size:13px;color:var(--muted)}
+.db{padding:6px 22px 24px;overflow:auto;flex:1}
+.db h4{font:600 14px var(--head);margin:20px 0 6px}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:7px 14px;font-size:13.5px;margin:0}
+.kv dt{color:var(--muted)}.kv dd{margin:0;word-break:break-word}
+.modal{position:fixed;z-index:95;left:50%;top:50%;transform:translate(-50%,-48%);width:min(480px,calc(100% - 32px));background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--pop);padding:26px}
+.modal[hidden]{display:none}
+.modal h3{font:700 21px/1.2 var(--head);margin:0 0 6px}
+.modal p{margin:0 0 4px;color:var(--muted);font-size:14px}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.sum div{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.sum b{display:block;font:700 24px/1.1 var(--head)}
+.sum span{font-size:12.5px;color:var(--muted)}
+.mact{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.mact .btn{justify-content:center;padding:12px 16px}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translate(-50%,24px);opacity:0;pointer-events:none;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-size:14px;font-weight:500;z-index:120;transition:.25s;max-width:calc(100% - 32px);box-shadow:var(--pop)}
+.toast.show{transform:translate(-50%,0);opacity:1}
+.toast.err{background:var(--bad);color:var(--on-bad)}
+.drop{position:fixed;inset:12px;z-index:130;border:3px dashed var(--brand);border-radius:22px;background:color-mix(in srgb,var(--surface) 88%,transparent);display:grid;place-content:center;text-align:center;font:700 26px var(--head);backdrop-filter:blur(3px)}
+.drop[hidden]{display:none}
+.drop span{display:block;font:500 15px var(--body);color:var(--muted);margin-top:6px}
+#tip{position:fixed;z-index:140;pointer-events:none;background:var(--ink);color:var(--bg);padding:9px 12px;border-radius:10px;font-size:12.5px;line-height:1.45;box-shadow:var(--pop);opacity:0;transition:opacity .12s;max-width:260px}
+#tip.on{opacity:1}
+#tip b{font-weight:700}
+#tip .r{display:flex;justify-content:space-between;gap:16px}
+.foot{padding:4px 0 26px;font-size:12.5px;color:var(--muted)}
+
+/* responsive */
+@media (max-width:1180px){
+  .f-branch,.f-term{grid-column:span 6}.f-akhir{grid-column:span 12}.f-tipe{grid-column:span 4}.f-from,.f-to{grid-column:span 4}.f-q{grid-column:span 8}.f-reset{grid-column:span 4}
+  .strip{grid-template-columns:repeat(3,1fr)}.st:nth-child(4){border-left:0}
+  .c8,.c7,.c5,.c4{grid-column:span 12}
+}
+@media (max-width:720px){
+  .wrap{padding:0 14px}
+  .top{padding:20px 0 56px}
+  .filters{padding:12px}
+  .f-branch,.f-term,.f-akhir,.f-tipe,.f-q{grid-column:span 12}.f-from,.f-to{grid-column:span 6}.f-reset{grid-column:span 12}
+  .seg-ctl{overflow:auto}
+  .strip{grid-template-columns:1fr 1fr}.st{border-left:0;border-top:1px solid var(--line)}.st:nth-child(-n+2){border-top:0}.st:nth-child(odd){border-right:1px solid var(--line)}
+  .hero{padding:22px 18px}.panel{padding:18px}
+  .hl{grid-template-columns:1fr;gap:2px}
+  .f-reset .lab{display:none}
+  .btn{padding:9px 12px}.actions{gap:8px}.st .v{font-size:21px}.st{padding:12px 14px}.st .v{white-space:nowrap}
+  .hb button,.hb .row{grid-template-columns:minmax(0,1fr) auto}.hb .trk{grid-column:1 / -1;order:3}
+  .bar{height:44px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{.filters,.actions,.pager,.tools{display:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="3" y="5" width="22" height="13" rx="3" stroke="#fff" stroke-width="1.8"/><path d="M8 22h12M10 18v4M18 18v4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="14" cy="11.5" r="2.6" fill="#7EE0D2"/></svg>
+      </div>
+      <div style="min-width:0">
+        <h1>Monitor Selisih Transaksi ATM/CRM</h1>
+        <p class="sub"><span id="subRange">Memuat data…</span><span id="subCount"></span><button class="linkbtn" id="resetData" hidden>Kembali ke data awal</button></p>
+      </div>
+    </div>
+    <div class="actions">
+      <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
+      <button class="btn ghost" id="btnUpload" type="button">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 14V3m0 0L6 7m4-4l4 4M3 13v3a1 1 0 001 1h12a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tx">Upload Excel</span>
+      </button>
+      <button class="btn solid" id="btnExport" type="button" aria-haspopup="true" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 3v11m0 0l-4-4m4 4l4-4M3 13v3a1 1 0 001 1h12a1 1 0 001-1v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tx">Export Excel</span>
+      </button>
+      <button class="btn icon" id="btnTheme" type="button" aria-label="Ganti tema terang/gelap">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M17 11.5A7 7 0 118.5 3a5.5 5.5 0 008.5 8.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="menu" id="expMenu" hidden role="menu">
+        <button type="button" role="menuitem" data-exp="filtered"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" style="margin-top:2px;flex:none"><path d="M3 4h14l-5.5 6.5V16l-3 1.5v-7L3 4z" stroke="var(--brand)" stroke-width="1.7" stroke-linejoin="round"/></svg><div><b>Data sesuai filter</b><span id="expF">0 baris</span></div></button>
+        <button type="button" role="menuitem" data-exp="all"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" style="margin-top:2px;flex:none"><rect x="3" y="3.5" width="14" height="13" rx="2" stroke="var(--brand)" stroke-width="1.7"/><path d="M3 8h14M8 8v8.5" stroke="var(--brand)" stroke-width="1.7"/></svg><div><b>Semua data</b><span id="expA">0 baris</span></div></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="filters" aria-label="Filter data">
+    <div class="fld f-branch"><label for="fBranch">Branch ID</label><select class="inp" id="fBranch"></select></div>
+    <div class="fld f-term"><label for="fTerm">Terminal ID</label><select class="inp" id="fTerm"></select></div>
+    <div class="fld f-akhir"><span class="lab" id="lAkhir">Status akhir</span><div class="seg-ctl" id="fAkhir" role="group" aria-labelledby="lAkhir"></div></div>
+    <div class="fld f-tipe"><label for="fTipe">Tipe transaksi</label><select class="inp" id="fTipe"></select></div>
+    <div class="fld f-from"><label for="fFrom">Dari tanggal</label><input class="inp" type="date" id="fFrom"></div>
+    <div class="fld f-to"><label for="fTo">Sampai tanggal</label><input class="inp" type="date" id="fTo"></div>
+    <div class="fld f-q"><label for="fQ">Cari</label><input class="inp" type="search" id="fQ" placeholder="Nama ATM, no. kartu, resi, TRKEY…" autocomplete="off"></div>
+    <div class="fld f-reset"><span class="lab" aria-hidden="true">&nbsp;</span><button class="btn line" id="fReset" type="button" style="height:40px;justify-content:center">Reset filter</button></div>
+  </section>
+  <div class="chips" id="chips" aria-live="polite"></div>
+
+  <main>
+    <section class="panel hero" aria-labelledby="heroH">
+      <h2 id="heroH"></h2>
+      <p class="lead" id="heroLead"></p>
+      <div class="bar" id="heroBar" role="group" aria-label="Komposisi status akhir"></div>
+      <div class="hl" id="heroLeg"></div>
+      <div class="tot-line" id="heroTot"></div>
+    </section>
+
+    <section class="panel strip" id="strip" style="margin-top:16px" aria-label="Ringkasan angka"></section>
+
+    <div class="grid">
+      <section class="panel c8">
+        <div class="ph">
+          <div><h3>Tren transaksi selisih</h3><p id="trendSub">Jumlah transaksi per periode, dipecah menurut status akhir</p></div>
+          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+            <div class="legend" id="trendLeg"></div>
+            <div class="seg-ctl" id="gran" role="group" aria-label="Rentang periode" style="height:36px"></div>
+          </div>
+        </div>
+        <div id="trend" style="min-height:320px"></div>
+      </section>
+
+      <section class="panel c4">
+        <div class="ph"><div><h3>Tipe transaksi</h3><p>Klik untuk memfilter</p></div></div>
+        <div class="donut-wrap"><div class="donut" id="donut"></div><div class="dleg" id="dleg"></div></div>
+      </section>
+
+      <div class="c7 stack">
+        <section class="panel">
+          <div class="ph"><div><h3>Selisih per branch</h3><p id="brSub">10 teratas · warna batang menunjukkan status akhir · klik untuk memilih branch</p></div></div>
+          <div class="hb" id="topB"></div>
+        </section>
+        <section class="panel">
+          <div class="ph"><div><h3>Terminal dengan selisih terbanyak</h3><p>10 teratas · klik untuk memilih terminal</p></div></div>
+          <div class="hb" id="topT"></div>
+        </section>
+      </div>
+
+      <div class="c5 stack">
+        <section class="panel">
+          <div class="ph"><div><h3>Pencocokan EJ dan Core</h3><p>Jumlah transaksi per kombinasi status · klik sel untuk memfilter</p></div></div>
+          <div id="matrix"></div>
+        </section>
+        <section class="panel">
+          <div class="ph"><div><h3>Sebaran nominal</h3><p>Jumlah transaksi menurut besar penarikan</p></div></div>
+          <div class="hb plain" id="buckets"></div>
+        </section>
+      </div>
+
+      <section class="panel c12">
+        <div class="ph">
+          <div><h3>Rincian transaksi</h3><p id="tblSub"></p></div>
+        </div>
+        <div class="tw" tabindex="0" aria-label="Tabel transaksi, dapat digulir">
+          <table class="dt"><thead id="thead"></thead><tbody id="tbody"></tbody><tfoot id="tfoot"></tfoot></table>
+        </div>
+        <div class="pager">
+          <div id="pgInfo"></div>
+          <div class="grp">
+            <label for="pgSize" class="sr">Baris per halaman</label>
+            <select class="inp" id="pgSize"><option>10</option><option selected>25</option><option>50</option><option>100</option></select>
+            <button class="btn line" id="pgPrev" type="button">Sebelumnya</button>
+            <span id="pgNum"></span>
+            <button class="btn line" id="pgNext" type="button">Berikutnya</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <p class="foot" id="foot"></p>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drTitle" aria-hidden="true">
+  <div class="dh"><div><h3 id="drTitle"></h3><p id="drSub"></p></div><button class="btn line" id="drClose" type="button" style="padding:8px 12px">Tutup</button></div>
+  <div class="db" id="drBody"></div>
+</aside>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" hidden>
+  <h3 id="mTitle">File siap diproses</h3>
+  <p id="mFile"></p>
+  <div class="sum"><div><b id="mRead">0</b><span>baris terbaca</span></div><div><b id="mNew">0</b><span>baris baru</span></div><div><b id="mDup">0</b><span>sudah ada</span></div></div>
+  <div class="mact">
+    <button class="btn primary" id="mAdd" type="button">Tambahkan baris baru</button>
+    <button class="btn line" id="mReplace" type="button">Ganti seluruh data dengan file ini</button>
+    <button class="btn line" id="mCancel" type="button">Batal</button>
+  </div>
+</div>
+<div class="drop" id="drop" hidden><div>Lepaskan file Excel di sini<span>Format kolom sama dengan laporan Penyelesaian Selisih</span></div></div>
+<div class="toast" id="toast" role="status"></div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+(function(){
+'use strict';
+var RAW = [{"no":1,"id":"KA001001","nama":"ATM KANTOR CABANG UTAMA 1","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Retracted","tgl":"2026-06-22","jam":"14:04:45","resi":3478,"acc":"3207671524","kartu":"627110******0723","amt":3000000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0622140445305879KA001001000000003478","ft":"TT261737YXTZ"},{"no":2,"id":"KA011007","nama":"ATM CENTER MM MANDALA","akhir":"Selesai","tx":"Normal","ej":"Success","core":"Success","cash":"Taken","tgl":"2026-07-01","jam":"05:44:59","resi":3154,"acc":"3201526751","kartu":"627110******7976","amt":100000,"tipe":"WITHDRAWAL","cashMsg":"CASH TAKEN","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Normal","coreRc":"00","trkey":"0701054459688620KA011007000000003154","ft":"TT261820GFDG"},{"no":3,"id":"KA011007","nama":"ATM CENTER MM MANDALA","akhir":"Selesai","tx":"Normal","ej":"Failed","core":"Blank","cash":"Blank","tgl":"2026-07-01","jam":"05:43:58","resi":3153,"acc":"3201526751","kartu":"627110******7976","amt":100000,"tipe":"WITHDRAWAL","cashMsg":"","rc":"CU","msg":"KARTU ATM ANDA TIDAK DAPAT DIPERGUNAKAN MOHON HUBUNGI CABANG TEDEKAT ATAU CALL CENTER","statMsg":"Normal","coreRc":"","trkey":"","ft":""},{"no":4,"id":"KA001014","nama":"ATM APOTEK RAHMAT","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-07-01","jam":"15:12:29","resi":5516,"acc":"2002732044","kartu":"6271100003635494","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0701151518651184KA001014000000005516","ft":"TT26182CB01Y"},{"no":5,"id":"KA001001","nama":"ATM KANTOR CABANG UTAMA 1","akhir":"Selesai","tx":"Normal","ej":"Failed","core":"Blank","cash":"Blank","tgl":"2026-07-01","jam":"07:19:01","resi":3938,"acc":"","kartu":"XXXXXXXXXXXXX","amt":0,"tipe":"","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"","trkey":"","ft":""},{"no":6,"id":"KA011007","nama":"ATM CENTER MM MANDALA","akhir":"Selesai","tx":"Abnormal","ej":"Success","core":"Blank","cash":"Taken","tgl":"2026-07-01","jam":"07:55:36","resi":-1,"acc":"3201674227","kartu":"627110******0205","amt":100000,"tipe":"WITHDRAWAL","cashMsg":"CASH TAKEN","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Normal","coreRc":"","trkey":"","ft":""},{"no":7,"id":"KA001001","nama":"ATM KANTOR CABANG UTAMA 1","akhir":"Selesai","tx":"Normal","ej":"Success","core":"Success","cash":"Taken","tgl":"2026-07-01","jam":"07:45:34","resi":3942,"acc":"2000177337","kartu":"627110******6053","amt":1800000,"tipe":"WITHDRAWAL","cashMsg":"CASH TAKEN","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Normal","coreRc":"00","trkey":"0701074534482631KA001001000000003942","ft":"TT26182VJ861"},{"no":8,"id":"KA011015","nama":"ATM CEMPAKA 2","akhir":"Selesai","tx":"Normal","ej":"Failed","core":"Failed","cash":"Blank","tgl":"2026-07-01","jam":"07:54:43","resi":7268,"acc":"3207235497","kartu":"627110******5893","amt":100000,"tipe":"WITHDRAWAL","cashMsg":"","rc":"T1","msg":"SALDO ANDA TIDAK MENCUKUPI","statMsg":"Normal","coreRc":"T7","trkey":"0701075443176229KA011015000000007268","ft":""},{"no":9,"id":"KA011007","nama":"ATM CENTER MM MANDALA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-07-02","jam":"20:17:09","resi":4113,"acc":"81251960","kartu":"1946341555348583","amt":500000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0702201811168474KA011007000000004113","ft":"TT261839GWDS"},{"no":10,"id":"KA011008","nama":"ATM CAMAT LANDASAN ULIN","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-07-03","jam":"16:24:24","resi":6764,"acc":"3204689392","kartu":"627110******6902","amt":300000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0703162424271690KA011008000000006764","ft":"TT26184PSNST"},{"no":11,"id":"KA001001","nama":"ATM KANTOR CABANG UTAMA 1","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-07-07","jam":"15:17:57","resi":4382,"acc":"6500454995","kartu":"6271109660003763","amt":2000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0707152734968677KA001001000000004382","ft":"FT26188PNNN3"},{"no":12,"id":"KA001001","nama":"ATM KANTOR CABANG UTAMA 1","akhir":"Selesai","tx":"Normal","ej":"Failed","core":"Failed","cash":"Blank","tgl":"2026-07-12","jam":"20:21:00","resi":4518,"acc":"","kartu":"627110","amt":0,"tipe":"CARDLESS WITHDRAWAL","cashMsg":"","rc":"05","msg":"","statMsg":"Normal","coreRc":"06","trkey":"0712202100536212KA001001000000004518","ft":""},{"no":13,"id":"KA001038","nama":"ATM SMKN 5 BANJARMASIN","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-07-21","jam":"17:32:33","resi":8367,"acc":"2000237283","kartu":"6271100002673561","amt":100000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0721173410541980KA001038000000008367","ft":"TT26202S8445"},{"no":14,"id":"KA004018","nama":"ATM KEC. BANJANG","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-07-27","jam":"15:21:53","resi":2834,"acc":"2000789839","kartu":"627110******5288","amt":800000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0727152153231223KA004018000000002834","ft":"TT26208C5H8D"},{"no":15,"id":"KA001059","nama":"CRM SUNGAI ANDAI","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-07-28","jam":"20:55:45","resi":2829,"acc":"3200774484","kartu":"6271100003686729","amt":3000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0728205653429669KA001059000000002829","ft":"TT26209VL4WR"},{"no":16,"id":"KA010024","nama":"CRM SUNGAI LOBAN","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-07-28","jam":"19:20:27","resi":6426,"acc":"3203882598","kartu":"6271100001813358","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0728192522571153KA010024000000006426","ft":"TT26209WR6DP"},{"no":17,"id":"KA001023","nama":"ATM KANTOR BP2TPM","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-07-29","jam":"14:21:58","resi":8815,"acc":"7820503265","kartu":"5307952116045031","amt":1500000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0729142310570588KA001023000000008815","ft":"TT2621069G8D"},{"no":18,"id":"KA002005","nama":"ATM PANTAI HAMBAWANG","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-07-29","jam":"10:20:43","resi":1766,"acc":"3204837456","kartu":"6271100002426176","amt":300000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0729103302574503KA002005000000001766","ft":"TT262109XQSM"},{"no":19,"id":"KA006012","nama":"ATM RSUD DATU SANGGUL","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-07-30","jam":"11:23:45","resi":3431,"acc":"2001149768","kartu":"627110******4727","amt":800000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0730112345892908KA006012000000003431","ft":"TT262119NRVW"},{"no":20,"id":"KA010019","nama":"CRM KC BATULICIN 2","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-07-30","jam":"09:42:06","resi":5564,"acc":"7316198893","kartu":"4043059706519995","amt":400000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0730094254408214KA010019000000005564","ft":"TT26211X18LC"},{"no":21,"id":"KA010024","nama":"CRM SUNGAI LOBAN","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-07-31","jam":"15:31:07","resi":6939,"acc":"2003063448","kartu":"6271100001952297","amt":500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0731154026976103KA010024000000006939","ft":"TT26212JJDQB"},{"no":22,"id":"KA001020","nama":"ATM RS SAMBANG LIHUM","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-07-31","jam":"15:48:12","resi":5231,"acc":"3202872084","kartu":"","amt":300000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0731154836748514KA001020000000005231","ft":"TT26212JDMZL"},{"no":23,"id":"SA903005","nama":"CRM KCPS BATULICIN","akhir":"Proses","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-01","jam":"22:42:06","resi":3645,"acc":"7300373927","kartu":"6271109600020109","amt":100000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0801230159821746SA903005000000003645","ft":"TT2621341WL3"},{"no":24,"id":"KA005004","nama":"ATM HOTEL ASTON TANJUNG","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-01","jam":"15:04:21","resi":8086,"acc":"3202013553","kartu":"627110******1258","amt":500000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0801150421407117KA005004000000008086","ft":"TT26213VSV9Z"},{"no":25,"id":"KA002017","nama":"CRM KC BARABAI 2","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-01","jam":"16:25:13","resi":4331,"acc":"3204848466","kartu":"6271100002515283","amt":2000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0801163225349931KA002017000000004331","ft":"TT26213W220D"},{"no":26,"id":"KA010021","nama":"CRM ALFAMART KOMPI","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-01","jam":"15:54:57","resi":7970,"acc":"3201673274","kartu":"6271100000165172","amt":400000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0801155930489212KA010021000000007970","ft":"TT26213SYJ2X"},{"no":27,"id":"KA002003","nama":"ATM RS DAMANHURI","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-01","jam":"15:19:47","resi":4465,"acc":"3201021579","kartu":"627110******1301","amt":200000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0801151947544115KA002003000000004465","ft":"TT26213BZVZ3"},{"no":28,"id":"KA011012","nama":"ATM CENTER APOTIK HALIZA FARMA","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-02","jam":"07:48:30","resi":3477,"acc":"3206068018","kartu":"627110******7243","amt":1500000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0802074830619738KA011012000000003477","ft":"TT26214CJ4LV"},{"no":29,"id":"KA002018","nama":"CRM KCP MURAKATA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-02","jam":"10:49:28","resi":6617,"acc":"2000375619","kartu":"6271100010601802","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0802105022290876KA002018000000006617","ft":"TT26214W7MBD"},{"no":30,"id":"KA001001","nama":"ATM KANTOR CABANG UTAMA 1","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-02","jam":"08:01:45","resi":5072,"acc":"2XXXXXX597","kartu":"627110******1763","amt":700000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0802080145479797KA001001000000005072","ft":"TT26214GNMQ7"},{"no":31,"id":"KA001051","nama":"ATM RS SARI MULIA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-02","jam":"06:54:02","resi":7612,"acc":"2000106189","kartu":"","amt":300000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0802065712179920KA001051000000007612","ft":"TT26214LKF08"},{"no":32,"id":"KA001057","nama":"CRM CENTER BELITUNG LAUT","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-03","jam":"18:38:07","resi":8974,"acc":"3201499339","kartu":"6271100000081734","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0803183945036094KA001057000000008974","ft":"TT26215J46L6"},{"no":33,"id":"KA010019","nama":"CRM KC BATULICIN 2","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-03","jam":"20:18:31","resi":6743,"acc":"3208215627","kartu":"6271100004241516","amt":1600000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0803201929781714KA010019000000006743","ft":"TT262152RN88"},{"no":34,"id":"KA002006","nama":"ATM BARABAI DARAT","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-03","jam":"19:50:48","resi":4597,"acc":"2002837218","kartu":"627110******0489","amt":1000000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0803195048963449KA002006000000004597","ft":"TT26215F2XJC"},{"no":35,"id":"KA014004","nama":"CRM KCP SATUI","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-03","jam":"05:30:14","resi":1807,"acc":"2001331623","kartu":"6271100003790372","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0803055923609464KA014004000000001807","ft":"TT26215410M4"},{"no":36,"id":"KA005021","nama":"CRM PERTOKOAN SERUMPUN","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-03","jam":"17:06:47","resi":2298,"acc":"2000952632","kartu":"6271100003131908","amt":2000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0803170746687717KA005021000000002298","ft":"TT26215P9Q9Y"},{"no":37,"id":"KA002018","nama":"CRM KCP MURAKATA","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-03","jam":"13:35:20","resi":7123,"acc":"2000466924","kartu":"627110******8055","amt":300000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0803133520011862KA002018000000007123","ft":"TT26215KLSF7"},{"no":38,"id":"SA903005","nama":"CRM KCPS BATULICIN","akhir":"Proses","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-03","jam":"19:58:03","resi":4059,"acc":"1823178481","kartu":"1946341280251433","amt":300000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0803200255187661SA903005000000004059","ft":"TT2621538Y9M"},{"no":39,"id":"KA010020","nama":"CRM INDOMARET BATULICIN RAYA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-03","jam":"18:38:01","resi":7481,"acc":"3207422718","kartu":"6271100003567515","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0803183859466669KA010020000000007481","ft":"TT26215LKTQV"},{"no":40,"id":"KA001063","nama":"CRM MM SALMA BANJARMASIN","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-03","jam":"02:45:13","resi":6967,"acc":"2003140728","kartu":"6271100001251898","amt":2000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0803071035730814KA001063000000006967","ft":"TT2621582RL1"},{"no":41,"id":"KA045003","nama":"ATM UNIT ANGSANA 2","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-03","jam":"08:01:16","resi":2329,"acc":"3206841922","kartu":"627110******8459","amt":2000000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0803080116185250KA045003000000002329","ft":"TT26215XDX04"},{"no":42,"id":"KA050003","nama":"CRM KCP SENGAYAM 2","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-04","jam":"18:22:50","resi":824,"acc":"6013012215395689","kartu":"6013012215395689","amt":200000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0804184342899720KA050003000000000824","ft":"TT26216D1HYR"},{"no":43,"id":"KA048003","nama":"CRM BUMDES JARO","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-04","jam":"17:11:34","resi":5255,"acc":"2000983953","kartu":"6271100000388063","amt":500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0804171318096669KA048003000000005255","ft":"TT262162ND3B"},{"no":44,"id":"KA005010","nama":"ATM CENTER KC TANJUNG 2","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-05","jam":"10:51:21","resi":6753,"acc":"3203431995","kartu":"627110******2132","amt":300000,"tipe":"CARDLESS WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0805105121889473KA005010000000006753","ft":"TT26217R1CZ9"},{"no":45,"id":"KA002010","nama":"ATM KEC BATANG ALAI","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-05","jam":"15:35:22","resi":5869,"acc":"2000438106","kartu":"6271100002523592","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0805154113854901KA002010000000005869","ft":"TT26217L5BBL"},{"no":46,"id":"KA005020","nama":"CRM HOTEL AROFAH","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-05","jam":"09:37:53","resi":4691,"acc":"2001006404","kartu":"","amt":500000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0805094441146015KA005020000000004691","ft":"TT262179ZGGF"},{"no":47,"id":"KA025004","nama":"CRM ATM KCP BINUANG","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-05","jam":"17:47:06","resi":5688,"acc":"3201042223","kartu":"6271100003672109","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0805174808714944KA025004000000005688","ft":"TT262173CR7X"},{"no":48,"id":"KA011007","nama":"ATM CENTER MM MANDALA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-05","jam":"17:59:03","resi":2075,"acc":"2002200058","kartu":"6271100004265986","amt":150000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0805180912566372KA011007000000002075","ft":"TT2621782B84"},{"no":49,"id":"KA001053","nama":"CRM GALERY DM","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-05","jam":"17:32:11","resi":6151,"acc":"3200162039","kartu":"6271100010390679","amt":1200000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0805174757170992KA001053000000006151","ft":"TT26217V82HX"},{"no":50,"id":"KA001019","nama":"ATM CENTER LKBN ANTARA BIRO","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-05","jam":"15:24:31","resi":1620,"acc":"2003135619","kartu":"6271100300006241","amt":1500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0805152821622303KA001019000000001620","ft":"TT26217Y3NPK"},{"no":51,"id":"SA935002","nama":"CRM KCPS PARINGIN","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-06","jam":"11:53:53","resi":2463,"acc":"3203753267","kartu":"","amt":300000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0806120509075425SA935002000000002463","ft":"FT262180DSX0"},{"no":52,"id":"KA043005","nama":"ATM GRIYA PERMATA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-07","jam":"16:37:17","resi":2427,"acc":"2002310492","kartu":"6271100002243589","amt":1200000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0807164707595562KA043005000000002427","ft":"TT262197K3YX"},{"no":53,"id":"KA016007","nama":"CRM AYN","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-08","jam":"08:14:20","resi":4477,"acc":"2003135422","kartu":"","amt":100000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0808083723014646KA016007000000004477","ft":"TT26220HFZN3"},{"no":54,"id":"KA001015","nama":"ATM APOTIK PERDAGANGAN","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-08","jam":"11:29:57","resi":6329,"acc":"3200685554","kartu":"627110******6980","amt":1000000,"tipe":"CARDLESS WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0808112957812481KA001015000000006329","ft":"TT26220STGW1"},{"no":55,"id":"KA005020","nama":"CRM HOTEL AROFAH","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-08","jam":"09:19:21","resi":5269,"acc":"","kartu":"622004110016891743","amt":1500000,"tipe":"AJ Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0808092101813782KA005020000000005269","ft":"TT26220GFPHD"},{"no":56,"id":"KA010022","nama":"CRM POLSEK KURANJI","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-09","jam":"18:15:20","resi":9806,"acc":"1905183910","kartu":"5371761280302040","amt":1500000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0809184933029035KA010022000000009806","ft":"TT26221PLM8V"},{"no":57,"id":"KA005019","nama":"CRM CENTER KC TANJUNG 1","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-09","jam":"11:30:57","resi":3613,"acc":"2000989738","kartu":"6271100000303260","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0809114410550868KA005019000000003613","ft":"TT26221L46Y5"},{"no":58,"id":"KA016001","nama":"ATM HOTEL ROYAL JELITA","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-09","jam":"08:26:56","resi":952,"acc":"7373003737","kartu":"627110******8029","amt":200000,"tipe":"CARDLESS WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0809082656182064KA016001000000000952","ft":"FT26221G3VFW"},{"no":59,"id":"KA014001","nama":"ATM KANTOR CAPEM SATUI 2","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-09","jam":"10:08:20","resi":5177,"acc":"3200234153","kartu":"627110******6469","amt":500000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0809100820179425KA014001000000005177","ft":"TT262218NRFK"},{"no":60,"id":"KA008006","nama":"ATM UPPD SAMSAT KANDANGAN","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-09","jam":"20:56:52","resi":690,"acc":"3202989402","kartu":"627110******2044","amt":2000000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0809205652365083KA008006000000000690","ft":"TT262215N01D"},{"no":61,"id":"KA012002","nama":"ATM KC MARABAHAN 2","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-10","jam":"16:23:46","resi":6829,"acc":"6500672488","kartu":"","amt":500000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0810164733444108KA012002000000006829","ft":"FT26222N0P5F"},{"no":62,"id":"KA001010","nama":"ATM MINIMARKET 3R","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-11","jam":"20:17:55","resi":7753,"acc":"2002458538","kartu":"6271100000905627","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0811202405570619KA001010000000007753","ft":"TT26223T1ZRZ"},{"no":63,"id":"KA007006","nama":"ATM HOTEL SINAR PELAIHARI","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-11","jam":"17:19:28","resi":2639,"acc":"7300899328","kartu":"","amt":100000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0811172324483888KA007006000000002639","ft":"FT26223G3BW6"},{"no":64,"id":"SA901006","nama":"ATM SYARIAH MAHATAMA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-12","jam":"10:18:02","resi":1304,"acc":"2000316183","kartu":"6271100000426921","amt":500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0812102640846823SA901006000000001304","ft":"FT262244YDJ0"},{"no":65,"id":"KA001058","nama":"CRM INDOMARET PRAMUKA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-12","jam":"17:47:05","resi":4311,"acc":"3205252249","kartu":"6271100002696208","amt":1500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0812175028131025KA001058000000004311","ft":"TT26224GZV3X"},{"no":66,"id":"KA005019","nama":"CRM CENTER KC TANJUNG 1","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-12","jam":"17:58:10","resi":4028,"acc":"2000972986","kartu":"6271100000918455","amt":1200000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0812175943597823KA005019000000004028","ft":"TT26224PSPGY"},{"no":67,"id":"KA043003","nama":"ATM KCP HANDIL BAKTI 2","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-13","jam":"14:16:50","resi":9438,"acc":"3205065147","kartu":"627110******5898","amt":500000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0813141650979625KA043003000000009438","ft":"TT2622539RFV"},{"no":68,"id":"SA934001","nama":"ATM TANJUNG REMA","akhir":"Proses","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-13","jam":"14:22:30","resi":5957,"acc":"2001608005","kartu":"6271100004106925","amt":100000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0813144133695648SA934001000000005957","ft":"FT26225SL1MH"},{"no":69,"id":"KA043003","nama":"ATM KCP HANDIL BAKTI 2","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-13","jam":"14:14:26","resi":9437,"acc":"3205065147","kartu":"627110******5898","amt":500000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0813141426094698KA043003000000009437","ft":"TT26225J2SQ9"},{"no":70,"id":"KA008013","nama":"CRM CENTER KC KANDANGAN","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-13","jam":"20:28:54","resi":1572,"acc":"7300235721","kartu":"6271109020085120","amt":100000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0813203336672188KA008013000000001572","ft":"FT26225L5LPD"},{"no":71,"id":"SA902007","nama":"CRM PASAR ANGKINANG","akhir":"Proses","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-14","jam":"20:33:46","resi":9228,"acc":"3207659842","kartu":"6271100003826143","amt":200000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0814203503720073SA902007000000009228","ft":"FT262260TKPY"},{"no":72,"id":"KA013021","nama":"CRM POLSEK HALONG","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-14","jam":"11:45:23","resi":9495,"acc":"3200421147","kartu":"6271100090251403","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0814115018665001KA013021000000009495","ft":"TT26226VFKS8"},{"no":73,"id":"KA004015","nama":"ATM AMUNTAI SELATAN","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-15","jam":"11:26:57","resi":5139,"acc":"7300989211","kartu":"627110******7576","amt":50000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0815112657752372KA004015000000005139","ft":"FT2622760F4F"},{"no":74,"id":"KA011008","nama":"ATM CAMAT LANDASAN ULIN","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-15","jam":"10:21:38","resi":9351,"acc":"2002088625","kartu":"6271100000790813","amt":3000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0815102549757592KA011008000000009351","ft":"TT26227Q1R1C"},{"no":75,"id":"KA001035","nama":"ATM YULIA CARWASH","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-15","jam":"09:15:50","resi":915,"acc":"2000071393","kartu":"6271100002758487","amt":300000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0815091718799159KA001035000000000915","ft":"TT26227DB62F"},{"no":76,"id":"KA001054","nama":"CRM HOTEL DELIMA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-18","jam":"20:03:56","resi":5469,"acc":"2003249371","kartu":"","amt":200000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0818200919768516KA001054000000005469","ft":"TT26230W2W75"},{"no":77,"id":"SA901011","nama":"CRM SYARIAH KCS BANJARMASIN 2","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-18","jam":"07:47:11","resi":1879,"acc":"6500062148","kartu":"6271109000083921","amt":100000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0818074902342893SA901011000000001879","ft":"TT26230PCQVT"},{"no":78,"id":"KA005019","nama":"CRM CENTER KC TANJUNG 1","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-19","jam":"10:22:52","resi":4978,"acc":"","kartu":"6274052022343245","amt":1500000,"tipe":"AJ Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0819102504002085KA005019000000004978","ft":"TT26231D8JHC"},{"no":79,"id":"KA011020","nama":"CRM KC BANJARBARU 2","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-19","jam":"20:54:57","resi":6435,"acc":"2002047597","kartu":"627110******1511","amt":300000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0819205457090997KA011020000000006435","ft":"TT262317W0Z0"},{"no":80,"id":"KA001059","nama":"CRM SUNGAI ANDAI","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-20","jam":"12:07:58","resi":1449,"acc":"3204652766","kartu":"6271100002244629","amt":400000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0820121015168221KA001059000000001449","ft":"TT26232XT1JW"},{"no":81,"id":"SA937003","nama":"CRM KCPS PELAIHARI","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-20","jam":"14:47:48","resi":782,"acc":"3200793608","kartu":"6271100000497179","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0820144834775114SA937003000000000782","ft":"FT26232Y9BJ7"},{"no":82,"id":"KA004008","nama":"ATM DISPEN HSU AMUNTAI","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-21","jam":"17:02:22","resi":8007,"acc":"2000802509","kartu":"6271100040136696","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0821170424125525KA004008000000008007","ft":"TT26233Y9GJV"},{"no":83,"id":"KA001053","nama":"CRM GALERY DM","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-21","jam":"20:37:45","resi":8461,"acc":"3205731058","kartu":"6271100003078380","amt":500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0821205655572277KA001053000000008461","ft":"TT26233CV9Z8"},{"no":84,"id":"SA903005","nama":"CRM KCPS BATULICIN","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-21","jam":"11:34:06","resi":6870,"acc":"2001882239","kartu":"6271100003388797","amt":300000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0821113528601992SA903005000000006870","ft":"FT262334R875"},{"no":85,"id":"KA026004","nama":"CRM ALFAMART KINTAP","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-22","jam":"19:58:07","resi":2666,"acc":"6013014286735728","kartu":"6013014286735728","amt":300000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0822200315029596KA026004000000002666","ft":"TT26234GN6T4"},{"no":86,"id":"KA002019","nama":"CRM BIRAYANG","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-22","jam":"10:16:30","resi":4802,"acc":"2003672703","kartu":"6271100001982575","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0822101713880369KA002019000000004802","ft":"TT262343GGMF"},{"no":87,"id":"KA001053","nama":"CRM GALERY DM","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-22","jam":"16:26:32","resi":8561,"acc":"6500488598","kartu":"6271109320022963","amt":500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0822162735060651KA001053000000008561","ft":"FT2623458JG8"},{"no":88,"id":"KA010021","nama":"CRM ALFAMART KOMPI","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-23","jam":"17:54:14","resi":3907,"acc":"2001996118","kartu":"6271100001326856","amt":2000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0823175457981352KA010021000000003907","ft":"TT262352ZB13"},{"no":89,"id":"KA048004","nama":"CRM KCP MUARA UYA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-23","jam":"07:45:39","resi":2595,"acc":"3203192378","kartu":"6271100003238695","amt":200000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0823074757493921KA048004000000002595","ft":"TT26235839C3"},{"no":90,"id":"KA002016","nama":"CRM KC BARABAI 1","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-24","jam":"14:32:44","resi":4831,"acc":"3200684407","kartu":"6271100003763882","amt":500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0824143910072819KA002016000000004831","ft":"TT26236B03K0"},{"no":91,"id":"KA012003","nama":"ATM RSUD ABDUL AZIS","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-24","jam":"16:56:03","resi":2789,"acc":"3205694497","kartu":"6271100120176406","amt":700000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0824165640021401KA012003000000002789","ft":"TT26236GH42X"},{"no":92,"id":"SA901006","nama":"ATM SYARIAH MAHATAMA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-25","jam":"11:44:48","resi":4886,"acc":"3205984819","kartu":"6271100003061337","amt":700000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0825114722535131SA901006000000004886","ft":"FT26237674LG"},{"no":93,"id":"KA045004","nama":"CRM KCP ATM ANGSANA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-25","jam":"17:45:42","resi":2893,"acc":"3202064271","kartu":"6271100002389457","amt":100000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0825180810587670KA045004000000002893","ft":"TT26237ZY1B2"},{"no":94,"id":"KA010022","nama":"CRM POLSEK KURANJI","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-27","jam":"19:16:34","resi":2089,"acc":"6013013608432766","kartu":"601301******2766","amt":500000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0827191634387134KA010022000000002089","ft":"TT262391NHVC"},{"no":95,"id":"KA002019","nama":"CRM BIRAYANG","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-27","jam":"06:42:12","resi":6149,"acc":"2003681257","kartu":"","amt":200000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0827064304271265KA002019000000006149","ft":"TT26239BKNKS"},{"no":96,"id":"KA015002","nama":"ATM PUSKESMAS NEGARA","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-27","jam":"07:22:33","resi":6691,"acc":"2001504528","kartu":"627110******6288","amt":100000,"tipe":"CARDLESS WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0827072233307055KA015002000000006691","ft":"TT26239T451L"},{"no":97,"id":"KA010023","nama":"CRM KANTOR DESA MANTEWE","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-27","jam":"11:34:26","resi":1112,"acc":"0310014817624","kartu":"6032987268062822","amt":250000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0827124629856493KA010023000000001112","ft":"TT26239B2KS1"},{"no":98,"id":"KA038002","nama":"CRM KCP DISPENDA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-27","jam":"09:54:25","resi":6855,"acc":"6013015213540933","kartu":"6013015213540933","amt":200000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0827095612894555KA038002000000006855","ft":"TT26239W6454"},{"no":99,"id":"KA010023","nama":"CRM KANTOR DESA MANTEWE","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-28","jam":"10:43:16","resi":1177,"acc":"3202931568","kartu":"6271100001341137","amt":900000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0828104810749064KA010023000000001177","ft":"TT262409LNGD"},{"no":100,"id":"KA016002","nama":"ATM MM BERUNTUNG JAYA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-28","jam":"10:47:47","resi":6498,"acc":"7820509000","kartu":"6019007616746013","amt":1150000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0828104812142102KA016002000000006498","ft":"TT26240BT0VH"},{"no":101,"id":"SA902006","nama":"CRM PESANTREN RAUDHATUL GHANA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-28","jam":"10:46:28","resi":5009,"acc":"2001494506","kartu":"6271100003975247","amt":1500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0828104709304647SA902006000000005009","ft":"FT26240220W4"},{"no":102,"id":"KA004015","nama":"ATM AMUNTAI SELATAN","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-28","jam":"10:19:59","resi":6925,"acc":"3203990487","kartu":"6271100001798435","amt":250000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0828104809296440KA004015000000006925","ft":"TT26240H9758"},{"no":103,"id":"KA002006","nama":"ATM BARABAI DARAT","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-28","jam":"10:43:34","resi":2392,"acc":"2000488219","kartu":"","amt":500000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0828104945433451KA002006000000002392","ft":"TT26240M96NT"},{"no":104,"id":"KA048004","nama":"CRM KCP MUARA UYA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-29","jam":"20:53:52","resi":3538,"acc":"2003350911","kartu":"5029963502792489","amt":1000000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0829210712518466KA048004000000003538","ft":"TT26241RHBR9"},{"no":105,"id":"KA002018","nama":"CRM KCP MURAKATA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-29","jam":"19:53:54","resi":5672,"acc":"2000400842","kartu":"","amt":300000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0829195702700997KA002018000000005672","ft":"TT26241NBCK2"},{"no":106,"id":"KA001057","nama":"CRM CENTER BELITUNG LAUT","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-29","jam":"13:05:59","resi":3348,"acc":"3207778132","kartu":"6271100003957377","amt":300000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0829131804161917KA001057000000003348","ft":"TT26241QN8PY"},{"no":107,"id":"SA901001","nama":"ATM SYARIAH SABILAL MUHTADIN","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-08-29","jam":"10:46:20","resi":1123,"acc":"323201004804503","kartu":"522184******1260","amt":1000000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0829104620016799SA901001000000001123","ft":"TT26241133HS"},{"no":108,"id":"KA011005","nama":"ATM KC BANJARBARU","akhir":"Proses","tx":"Suspect","ej":"Blank","core":"Blank","cash":"Retracted","tgl":"2026-08-30","jam":"11:57:12","resi":4304,"acc":"3208426148","kartu":"627110******0195","amt":200000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"","trkey":"","ft":""},{"no":109,"id":"KA001056","nama":"CRM CENTER SPBU BELITUNG BANJARMASIN","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-30","jam":"13:14:15","resi":2602,"acc":"3200705277","kartu":"6271100010000138","amt":900000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0830133914515386KA001056000000002602","ft":"TT26242KJW5W"},{"no":110,"id":"KA010019","nama":"CRM KC BATULICIN 2","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-08-31","jam":"11:51:38","resi":979,"acc":"2001979003","kartu":"6271100000167947","amt":3000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0831115415340362KA010019000000000979","ft":"TT26243LJ8HD"},{"no":111,"id":"KA008015","nama":"CRM AL ABRAR","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-01","jam":"17:32:01","resi":4626,"acc":"2001510471","kartu":"6271100000893195","amt":400000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0901173331662839KA008015000000004626","ft":"TT26244XSLKL"},{"no":112,"id":"KA002011","nama":"ATM MOBIL KC BARABAI","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Blank","cash":"Retracted","tgl":"2026-09-01","jam":"09:29:33","resi":9015,"acc":"2000434836","kartu":"627110******7560","amt":1300000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"","trkey":"","ft":""},{"no":113,"id":"KA001052","nama":"CRM KCP SULTAN ADAM","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-01","jam":"17:46:10","resi":390,"acc":"3207677794","kartu":"6271100003931000","amt":500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0901175021850991KA001052000000000390","ft":"TT26244JDQCC"},{"no":114,"id":"KA005020","nama":"CRM HOTEL AROFAH","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-02","jam":"11:44:49","resi":322,"acc":"2005049235","kartu":"5029963508109001","amt":500000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0902114732970921KA005020000000000322","ft":"TT26245QP59D"},{"no":115,"id":"KA011005","nama":"ATM KC BANJARBARU","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-02","jam":"08:08:42","resi":5281,"acc":"2002190012","kartu":"627110******9176","amt":500000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0902080842244189KA011005000000005281","ft":"TT26245STSTH"},{"no":116,"id":"KA006012","nama":"ATM RSUD DATU SANGGUL","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Blank","cash":"Retracted","tgl":"2026-09-02","jam":"07:24:32","resi":6551,"acc":"2001139517","kartu":"627110******8370","amt":100000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"","trkey":"","ft":""},{"no":117,"id":"KA006010","nama":"CRM KC RANTAU 2","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-03","jam":"06:21:08","resi":3113,"acc":"2001139757","kartu":"","amt":100000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0903062301652381KA006010000000003113","ft":"TT26246FNF17"},{"no":118,"id":"KA011021","nama":"CRM KANTOR KAS CEMPAKA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-03","jam":"07:01:32","resi":4624,"acc":"2002180319","kartu":"6271100001105706","amt":950000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0903074051184951KA011021000000004624","ft":"TT262462TC40"},{"no":119,"id":"KA001051","nama":"ATM RS SARI MULIA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-03","jam":"15:24:52","resi":958,"acc":"3200398776","kartu":"6271100430044229","amt":700000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0903154654261221KA001051000000000958","ft":"TT26246D61V0"},{"no":120,"id":"KA008012","nama":"ATM BAKUEDA KANDANGAN","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-03","jam":"08:17:01","resi":9279,"acc":"2001429887","kartu":"6271100000186467","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0903081849624662KA008012000000009279","ft":"TT26246TJRJN"},{"no":121,"id":"KA007012","nama":"CRM CAB PELAIHARI 2","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-03","jam":"19:36:31","resi":2185,"acc":"2001232878","kartu":"627110******2454","amt":200000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0903193631265855KA007012000000002185","ft":"TT26246VJQH5"},{"no":122,"id":"KA010011","nama":"ATM DISDIK KAB. TNH BUMBU","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-03","jam":"08:53:07","resi":4255,"acc":"3202962369","kartu":"","amt":100000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0903085816973338KA010011000000004255","ft":"TT262460Z7P3"},{"no":123,"id":"KA010019","nama":"CRM KC BATULICIN 2","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-04","jam":"08:50:29","resi":2294,"acc":"3207317267","kartu":"627110******4308","amt":800000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0904085029931244KA010019000000002294","ft":"TT26247NZWNV"},{"no":124,"id":"KA001059","nama":"CRM SUNGAI ANDAI","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-04","jam":"16:08:21","resi":7902,"acc":"2000033432","kartu":"6271100010477708","amt":500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0904161000202805KA001059000000007902","ft":"TT262472N7C2"},{"no":125,"id":"KA008016","nama":"CRM RSUD HASAN BASRY","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-04","jam":"10:46:58","resi":9030,"acc":"2001510878","kartu":"6271100001791216","amt":800000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0904104757070870KA008016000000009030","ft":"TT26247NJKXC"},{"no":126,"id":"KA007003","nama":"ATM CAB PELAIHARI 3","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-04","jam":"09:49:04","resi":6523,"acc":"3204941385","kartu":"627110******7995","amt":3000000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0904094904781894KA007003000000006523","ft":"TT26247PGC88"},{"no":127,"id":"SA933004","nama":"CRM KCPS AMUNTAI","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-04","jam":"14:45:56","resi":5077,"acc":"2000755942","kartu":"627110******9270","amt":3000000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0904144556440363SA933004000000005077","ft":"FT26247H4LZ2"},{"no":128,"id":"KA007010","nama":"ATM DISDIK KAB. TANAH LAUT","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-05","jam":"20:21:02","resi":518,"acc":"2001236302","kartu":"627110******8894","amt":1500000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0905202102257424KA007010000000000518","ft":"TT26248XGGQ2"},{"no":129,"id":"KA043002","nama":"ATM DESA SEMANGAT DALAM","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-05","jam":"07:49:31","resi":8035,"acc":"7243182508","kartu":"404305******1230","amt":600000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0905074931640403KA043002000000008035","ft":"TT26248D3W66"},{"no":130,"id":"KA001057","nama":"CRM CENTER BELITUNG LAUT","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-05","jam":"22:19:48","resi":4936,"acc":"7210044382","kartu":"6271109010156774","amt":350000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0905222218581002KA001057000000004936","ft":"FT2624805NQ1"},{"no":131,"id":"KA001059","nama":"CRM SUNGAI ANDAI","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-07","jam":"12:46:39","resi":8963,"acc":"2000044361","kartu":"6271100000629169","amt":2000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0907125347320722KA001059000000008963","ft":"TT26250NS53V"},{"no":132,"id":"KA010021","nama":"CRM ALFAMART KOMPI","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-07","jam":"13:32:29","resi":8520,"acc":"2001949341","kartu":"6271100004004278","amt":300000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0907133719673836KA010021000000008520","ft":"TT26250V9TB6"},{"no":133,"id":"KA010019","nama":"CRM KC BATULICIN 2","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-07","jam":"06:09:29","resi":2761,"acc":"3200270826","kartu":"6271100003200323","amt":250000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0907061008486580KA010019000000002761","ft":"TT26250LLCTG"},{"no":134,"id":"KA009012","nama":"ATM KC MARTAPURA 3","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Blank","cash":"Retracted","tgl":"2026-09-07","jam":"14:41:44","resi":5812,"acc":"7300789778","kartu":"627110******8642","amt":200000,"tipe":"CARDLESS WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"","trkey":"","ft":""},{"no":135,"id":"KA005022","nama":"CRM MESJID MUTAAKHIRIN","akhir":"Proses","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-07","jam":"17:05:30","resi":7580,"acc":"2003344943","kartu":"6271100000553112","amt":200000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0907171358547517KA005022000000007580","ft":"TT262506WX5V"},{"no":136,"id":"KA013021","nama":"CRM POLSEK HALONG","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-08","jam":"15:04:06","resi":6986,"acc":"2002445247","kartu":"6271100130173187","amt":3000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0908152554421593KA013021000000006986","ft":"TT26251V8QMJ"},{"no":137,"id":"KA007009","nama":"ATM SARANG HALANG","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-08","jam":"12:49:31","resi":3626,"acc":"3205314128","kartu":"627110******1781","amt":300000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0908124931613810KA007009000000003626","ft":"TT262514RQQF"},{"no":138,"id":"KA002003","nama":"ATM RS DAMANHURI","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-08","jam":"04:41:52","resi":7111,"acc":"3205314527","kartu":"627110******1095","amt":100000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0908044152330787KA002003000000007111","ft":"TT2625121RG2"},{"no":139,"id":"KA001059","nama":"CRM SUNGAI ANDAI","akhir":"Proses","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-08","jam":"14:11:38","resi":9452,"acc":"2000315427","kartu":"6271100090264968","amt":300000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0908142428974204KA001059000000009452","ft":"TT2625155P6N"},{"no":140,"id":"KA034004","nama":"ATM MAPOLDA KALSEL","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-09","jam":"13:51:32","resi":2186,"acc":"3204024471","kartu":"627110******1432","amt":1000000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0909135132001932KA034004000000002186","ft":"TT26252PKNTD"},{"no":141,"id":"KA005022","nama":"CRM MESJID MUTAAKHIRIN","akhir":"Proses","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-09","jam":"13:26:31","resi":7735,"acc":"6013012269639560","kartu":"6013012269639560","amt":1600000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0909133926838348KA005022000000007735","ft":"TT262528BC9R"},{"no":142,"id":"KA010019","nama":"CRM KC BATULICIN 2","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-09","jam":"16:33:38","resi":3014,"acc":"2001905379","kartu":"6271100000474228","amt":600000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0909164539987627KA010019000000003014","ft":"TT26252187LT"},{"no":143,"id":"KA048003","nama":"CRM BUMDES JARO","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-09","jam":"16:39:20","resi":8478,"acc":"3207440581","kartu":"","amt":100000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0909164409321165KA048003000000008478","ft":"TT262520NRWK"},{"no":144,"id":"KA035003","nama":"CRM KCP PEMKAB TALA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-10","jam":"11:15:17","resi":1200,"acc":"2003282751","kartu":"","amt":200000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0910111900768261KA035003000000001200","ft":"TT26253L7KLS"},{"no":145,"id":"KA010021","nama":"CRM ALFAMART KOMPI","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-11","jam":"07:44:15","resi":9454,"acc":"3200240161","kartu":"6271100100166005","amt":3000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0911074504093307KA010021000000009454","ft":"TT26254RH5VZ"},{"no":146,"id":"KA001060","nama":"CRM INDOMARET SUNGAI TABUK","akhir":"Proses","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-12","jam":"14:37:04","resi":2759,"acc":"2000231692","kartu":"6271100002981105","amt":100000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0912144000715040KA001060000000002759","ft":"TT262557HQNS"},{"no":147,"id":"KA001010","nama":"ATM MINIMARKET 3R","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-12","jam":"16:48:13","resi":4548,"acc":"2000121177","kartu":"6271100001848263","amt":300000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0912164933774247KA001010000000004548","ft":"TT2625532HGR"},{"no":148,"id":"KA001060","nama":"CRM INDOMARET SUNGAI TABUK","akhir":"Proses","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-12","jam":"14:47:50","resi":2764,"acc":"2003121812","kartu":"","amt":200000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0912145046553166KA001060000000002764","ft":"TT26255ZFRP9"},{"no":149,"id":"KA045004","nama":"CRM KCP ATM ANGSANA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-13","jam":"17:06:19","resi":5173,"acc":"2080208148","kartu":"5371761285501380","amt":100000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0913171518473468KA045004000000005173","ft":"TT26256KCCMT"},{"no":150,"id":"KA002011","nama":"ATM MOBIL KC BARABAI","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-13","jam":"17:07:11","resi":2858,"acc":"2000470077","kartu":"6271100004473754","amt":1000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0913172928336471KA002011000000002858","ft":"TT26256VYQQ8"},{"no":151,"id":"KA002018","nama":"CRM KCP MURAKATA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-14","jam":"15:38:48","resi":1789,"acc":"3208481052","kartu":"6271100004460546","amt":2000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0914154335625482KA002018000000001789","ft":"TT26257XC9N3"},{"no":152,"id":"KA008003","nama":"ATM PADANG BATUNG","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-16","jam":"21:18:59","resi":4649,"acc":"2001458526","kartu":"627110******5289","amt":1500000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0916211859395367KA008003000000004649","ft":"TT26259DPR0S"},{"no":153,"id":"SA902006","nama":"CRM PESANTREN RAUDHATUL GHANA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-16","jam":"16:19:46","resi":8662,"acc":"2001463325","kartu":"6271100002828793","amt":300000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0916162042384022SA902006000000008662","ft":"FT2625975KLP"},{"no":154,"id":"SA901011","nama":"CRM SYARIAH KCS BANJARMASIN 2","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-16","jam":"06:37:27","resi":5456,"acc":"6500059719","kartu":"6271109010186532","amt":200000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0916065658350598SA901011000000005456","ft":"TT26259MSRKC"},{"no":155,"id":"KA002018","nama":"CRM KCP MURAKATA","akhir":"Selesai","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-16","jam":"15:12:30","resi":2633,"acc":"3205020844","kartu":"6271100002578869","amt":1500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0916151355005342KA002018000000002633","ft":"TT26259947CJ"},{"no":156,"id":"KA052004","nama":"CRM KCP LONTAR 2","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-16","jam":"14:55:41","resi":1456,"acc":"3206596073","kartu":"6271100003282370","amt":300000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0916145744408474KA052004000000001456","ft":"TT26259033CC"},{"no":157,"id":"KA002006","nama":"ATM BARABAI DARAT","akhir":"Selesai","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-17","jam":"07:42:46","resi":9664,"acc":"2000471766","kartu":"627110******1625","amt":1000000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0917074246144275KA002006000000009664","ft":"TT262605KFPC"},{"no":158,"id":"KA010022","nama":"CRM POLSEK KURANJI","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-17","jam":"16:52:43","resi":5317,"acc":"2003091058","kartu":"6271100290014718","amt":200000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0917170626906225KA010022000000005317","ft":"TT262607JB14"},{"no":159,"id":"KA010021","nama":"CRM ALFAMART KOMPI","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-17","jam":"20:11:04","resi":768,"acc":"3201776348","kartu":"6271100000259165","amt":100000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0917201232399294KA010021000000000768","ft":"TT26260F0ZM6"},{"no":160,"id":"KA009012","nama":"ATM KC MARTAPURA 3","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Blank","cash":"Retracted","tgl":"2026-09-18","jam":"07:37:28","resi":7680,"acc":"3201808258","kartu":"627110******4012","amt":500000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"","trkey":"","ft":""},{"no":161,"id":"KA005018","nama":"CRM KC. TANJUNG 2","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-18","jam":"19:13:25","resi":76,"acc":"2000906077","kartu":"","amt":200000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0918192311762380KA005018000000000076","ft":"TT262616W8L1"},{"no":162,"id":"KA041002","nama":"CRM KCP MARGASARI","akhir":"Proses","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-19","jam":"11:33:50","resi":7458,"acc":"2003495259","kartu":"627110******1512","amt":1000000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0919113350403101KA041002000000007458","ft":"TT26262NN9L3"},{"no":163,"id":"KA010019","nama":"CRM KC BATULICIN 2","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-19","jam":"10:09:22","resi":4029,"acc":"3202097285","kartu":"","amt":600000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0919104219890443KA010019000000004029","ft":"TT26262ZPSLY"},{"no":164,"id":"KA004020","nama":"CRM CENTER KC. AMUNTAI","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-19","jam":"12:22:26","resi":4470,"acc":"3205243401","kartu":"6271100002832993","amt":1100000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0919122550021012KA004020000000004470","ft":"TT262627NMZX"},{"no":165,"id":"KA001052","nama":"CRM KCP SULTAN ADAM","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-19","jam":"16:46:52","resi":5512,"acc":"2003133721","kartu":"6271100000538188","amt":1500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0919170149177695KA001052000000005512","ft":"TT262625TY9M"},{"no":166,"id":"SA903005","nama":"CRM KCPS BATULICIN","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-20","jam":"12:33:03","resi":1426,"acc":"3206255818","kartu":"627110******3026","amt":400000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0920123303135033SA903005000000001426","ft":"FT262636HFG5"},{"no":167,"id":"SA901004","nama":"ATM SYARIAH KCS BANJARMASIN","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-20","jam":"17:35:13","resi":8551,"acc":"7300787748","kartu":"627110******6402","amt":1000000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0920173513523843SA901004000000008551","ft":"TT26263ZDB9G"},{"no":168,"id":"KA005013","nama":"ATM STIA TABALONG","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-20","jam":"10:35:41","resi":8603,"acc":"2000908765","kartu":"","amt":500000,"tipe":"MB Cardless Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0920103628617457KA005013000000008603","ft":"TT26263VHG7X"},{"no":169,"id":"KA005021","nama":"CRM PERTOKOAN SERUMPUN","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-20","jam":"10:26:11","resi":3675,"acc":"3205800424","kartu":"627110******2546","amt":100000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0920102611557394KA005021000000003675","ft":"TT26263W4WWP"},{"no":170,"id":"KA011019","nama":"CRM BJB","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-20","jam":"12:01:32","resi":6865,"acc":"3207351066","kartu":"6271100003563878","amt":1500000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0920122734044167KA011019000000006865","ft":"TT2626397HLK"},{"no":171,"id":"KA005011","nama":"ATM CENTER MINI MARKET MARIZKA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-21","jam":"12:43:00","resi":8733,"acc":"3205544468","kartu":"6271100002083308","amt":100000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0921124347834678KA005011000000008733","ft":"TT26264TT3F0"},{"no":172,"id":"KA004018","nama":"ATM KEC. BANJANG","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-21","jam":"15:41:32","resi":2999,"acc":"3204281342","kartu":"6271100002020698","amt":200000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0921154714635823KA004018000000002999","ft":"TT26264MYMZD"},{"no":173,"id":"KA011014","nama":"ATM RSUD IDAMAN","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-21","jam":"08:52:15","resi":3718,"acc":"2002211974","kartu":"627110******4365","amt":1500000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0921085215638734KA011014000000003718","ft":"TT26264P9V0F"},{"no":174,"id":"KA038002","nama":"CRM KCP DISPENDA","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-21","jam":"11:02:38","resi":1859,"acc":"450301010651538","kartu":"5221840286657888","amt":1500000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0921110414228850KA038002000000001859","ft":"TT26264F8R5Z"},{"no":175,"id":"SA902003","nama":"ATM GURU KAPUH","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-22","jam":"08:42:55","resi":2942,"acc":"7191078289","kartu":"6034949025959292","amt":400000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0922090534877183SA902003000000002942","ft":"TT26265T5CCJ"},{"no":176,"id":"KA004002","nama":"ATM KC. AMUNTAI 1","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-23","jam":"16:01:27","resi":3583,"acc":"7300804238","kartu":"627110******8230","amt":50000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0923160127311804KA004002000000003583","ft":"FT26266WPTF6"},{"no":177,"id":"KA001059","nama":"CRM SUNGAI ANDAI","akhir":"Belum","tx":"Suspect","ej":"Success","core":"Success","cash":"Retracted","tgl":"2026-09-23","jam":"07:12:05","resi":4519,"acc":"2000245227","kartu":"627110******0873","amt":100000,"tipe":"WITHDRAWAL","cashMsg":"CASH RETRACTED","rc":"00","msg":"TRANSAKSI SUKSES","statMsg":"Cash retracted","coreRc":"00","trkey":"0923071205343859KA001059000000004519","ft":"TT26266QQY39"},{"no":178,"id":"KA050001","nama":"ATM UNIT SENGAYAM","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-25","jam":"07:30:39","resi":3084,"acc":"2000627863","kartu":"6271100002333794","amt":300000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0925073236535766KA050001000000003084","ft":"TT262684WLKY"},{"no":179,"id":"KA050003","nama":"CRM KCP SENGAYAM 2","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-25","jam":"07:04:03","resi":8456,"acc":"1846510058","kartu":"5371761280581775","amt":200000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0925072950853002KA050003000000008456","ft":"TT262682WHT8"},{"no":180,"id":"KA026004","nama":"CRM ALFAMART KINTAP","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-26","jam":"21:09:02","resi":6014,"acc":"2103100776","kartu":"5264223133922797","amt":100000,"tipe":"JALIN Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0926222716328926KA026004000000006014","ft":"TT26269732HK"},{"no":181,"id":"KA010021","nama":"CRM ALFAMART KOMPI","akhir":"Belum","tx":"Suspect","ej":"Failed","core":"Success","cash":"Blank","tgl":"2026-09-27","jam":"11:40:04","resi":3151,"acc":"3202226972","kartu":"6271100000706330","amt":2000000,"tipe":"ONUS Cash Withdrawal","cashMsg":"","rc":"","msg":"Resi Loncat","statMsg":"","coreRc":"00","trkey":"0927114127011785KA010021000000003151","ft":"TT26270PT2FB"}];
+
+/* ---------- util ---------- */
+var $=function(s,el){return (el||document).querySelector(s)};
+var $$=function(s,el){return Array.prototype.slice.call((el||document).querySelectorAll(s))};
+var MON=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+var NF=new Intl.NumberFormat('id-ID');
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var rp=function(n){return 'Rp '+NF.format(Math.round(n))};
+function rpS(n){var a=Math.abs(n);
+  if(a>=1e9) return 'Rp '+(n/1e9).toLocaleString('id-ID',{maximumFractionDigits:2})+' M';
+  if(a>=1e6) return 'Rp '+(n/1e6).toLocaleString('id-ID',{maximumFractionDigits:2})+' jt';
+  return rp(n)}
+function pct(a,b,d){return b?((a/b)*100).toLocaleString('id-ID',{maximumFractionDigits:d==null?1:d}):'0'}
+function fD(iso){if(!iso)return '—';var p=iso.split('-');return +p[2]+' '+MON[+p[1]-1]+' '+p[0]}
+function fDn(iso){if(!iso)return '';var p=iso.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
+var STATUS=['Selesai','Proses','Belum'];
+var SCOL={Selesai:'var(--ok)',Proses:'var(--warn)',Belum:'var(--bad)'};
+var SON={Selesai:'var(--on-ok)',Proses:'var(--on-warn)',Belum:'var(--on-bad)'};
+var SPILL={Selesai:'ok',Proses:'warn',Belum:'bad'};
+function scol(s){return SCOL[s]||'var(--s6)'}
+var SERIES=['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)','var(--s6)'];
+function dotCls(v){var m={success:'ok',normal:'ok',taken:'ok',failed:'bad',abnormal:'bad',suspect:'warn',retracted:'warn'};return m[String(v||'').toLowerCase()]||''}
+
+/* ---------- state ---------- */
+var STORE='trxdash.v1', THEME='trxdash.theme';
+var DATA=RAW.map(function(r){return Object.assign({},r)});
+var META={source:'DATA_TRX_GGL_SMPAI_27_SEP_2026.xlsx',modified:false,updated:''};
+try{var s=localStorage.getItem(STORE);if(s){var o=JSON.parse(s);if(o&&Array.isArray(o.rows)&&o.rows.length){DATA=o.rows;META=o.meta||META}}}catch(e){}
+function persist(){try{localStorage.setItem(STORE,JSON.stringify({rows:DATA,meta:META}))}catch(e){}}
+var F={branch:'',terminal:'',akhir:new Set(),tipe:'',from:'',to:'',q:'',ej:'',core:''};
+var G='week', SORT={k:'dt',d:-1}, PG={page:1,size:25};
+var firstRender=true;
+var HAY=new WeakMap();
+function hay(r){var h=HAY.get(r);if(!h){h=[r.id,brOf(r),r.nama,r.kartu,r.acc,r.resi,r.trkey,r.ft,r.tipe,r.msg,r.akhir].join(' ').toLowerCase();HAY.set(r,h)}return h}
+function tipeOf(r){return r.tipe||'Lainnya'}
+function brOf(r){return String(r.id||'').slice(0,5).toUpperCase()}
+
+function filt(skip){
+  skip=skip||[];var q=F.q.trim().toLowerCase();
+  return DATA.filter(function(r){
+    if(skip.indexOf('branch')<0&&F.branch&&brOf(r)!==F.branch)return false;
+    if(skip.indexOf('terminal')<0&&F.terminal&&r.id!==F.terminal)return false;
+    if(skip.indexOf('akhir')<0&&F.akhir.size&&!F.akhir.has(r.akhir))return false;
+    if(skip.indexOf('tipe')<0&&F.tipe&&tipeOf(r)!==F.tipe)return false;
+    if(F.from&&(!r.tgl||r.tgl<F.from))return false;
+    if(F.to&&(!r.tgl||r.tgl>F.to))return false;
+    if(skip.indexOf('mx')<0&&F.ej&&r.ej!==F.ej)return false;
+    if(skip.indexOf('mx')<0&&F.core&&r.core!==F.core)return false;
+    if(q&&hay(r).indexOf(q)<0)return false;
+    return true});
+}
+function sum(rows){var t=0;rows.forEach(function(r){t+=r.amt||0});return t}
+function countBy(rows,fn){var m={};rows.forEach(function(r){var k=fn(r);(m[k]||(m[k]={n:0,sum:0,rows:[]})).n++;m[k].sum+=r.amt||0});return m}
+
+/* ---------- tooltip / toast ---------- */
+var tip=$('#tip');
+function showTip(html,e){tip.innerHTML=html;tip.classList.add('on');var w=tip.offsetWidth,h=tip.offsetHeight;
+  var x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px'}
+function hideTip(){tip.classList.remove('on')}
+var toastT;function toast(msg,err){var t=$('#toast');t.textContent=msg;t.className='toast show'+(err?' err':'');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},err?5200:3400)}
+
+/* ---------- header / filters ---------- */
+function dateRange(){var d=DATA.map(function(r){return r.tgl}).filter(Boolean).sort();return d.length?[d[0],d[d.length-1]]:['','']}
+function renderHeader(){
+  var dr=dateRange(), ids=new Set(DATA.map(function(r){return r.id}));
+  $('#subRange').textContent=dr[0]?('Periode '+fD(dr[0])+' – '+fD(dr[1])):'Belum ada data';
+  var brs=new Set(DATA.map(brOf));$('#subCount').textContent=NF.format(DATA.length)+' transaksi dari '+NF.format(ids.size)+' terminal di '+NF.format(brs.size)+' branch';
+  $('#resetData').hidden=!META.modified;
+  $('#foot').textContent='Sumber data: '+META.source+(META.updated?' — diperbarui '+META.updated:'')+'. Data hasil upload tersimpan di peramban ini saja.';
+}
+function renderTerminalSelect(){
+  var bb=countBy(DATA,brOf),bk=Object.keys(bb).sort(),bt={};
+  DATA.forEach(function(r){(bt[brOf(r)]||(bt[brOf(r)]=new Set())).add(r.id)});
+  $('#fBranch').innerHTML='<option value="">Semua branch ('+bk.length+')</option>'+bk.map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+' — '+bt[k].size+' terminal, '+bb[k].n+' trx</option>'}).join('');
+  $('#fBranch').value=bk.indexOf(F.branch)>=0?F.branch:'';F.branch=$('#fBranch').value;
+  renderTermSelect();
+  var tp=countBy(DATA,tipeOf),tk=Object.keys(tp).sort(function(a,b){return tp[b].n-tp[a].n});
+  $('#fTipe').innerHTML='<option value="">Semua tipe</option>'+tk.map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+' ('+tp[k].n+')</option>'}).join('');
+  $('#fTipe').value=tk.indexOf(F.tipe)>=0?F.tipe:'';F.tipe=$('#fTipe').value;
+  var dr=dateRange();$('#fFrom').min=$('#fTo').min=dr[0];$('#fFrom').max=$('#fTo').max=dr[1];
+}
+function renderTermSelect(){
+  var src=F.branch?DATA.filter(function(r){return brOf(r)===F.branch}):DATA;
+  var by=countBy(src,function(r){return r.id}),names={};src.forEach(function(r){names[r.id]=r.nama});
+  var ids=Object.keys(by).sort();
+  $('#fTerm').innerHTML='<option value="">Semua terminal ('+ids.length+')</option>'+ids.map(function(id){return '<option value="'+esc(id)+'">'+esc(id)+' — '+esc(names[id])+' ('+by[id].n+')</option>'}).join('');
+  $('#fTerm').value=ids.indexOf(F.terminal)>=0?F.terminal:'';F.terminal=$('#fTerm').value;
+}
+function renderAkhirChips(){
+  var rows=filt(['akhir']),by=countBy(rows,function(r){return r.akhir});
+  var keys=STATUS.concat(Object.keys(by).filter(function(k){return STATUS.indexOf(k)<0&&k}));
+  var html='<button type="button" data-s="" aria-pressed="'+(F.akhir.size===0)+'">Semua <small>'+rows.length+'</small></button>';
+  keys.forEach(function(k){html+='<button type="button" data-s="'+esc(k)+'" aria-pressed="'+F.akhir.has(k)+'"><i style="background:'+scol(k)+'"></i>'+esc(k)+' <small>'+((by[k]||{}).n||0)+'</small></button>'});
+  $('#fAkhir').innerHTML=html;
+}
+function renderChips(){
+  var c=[];
+  if(F.ej)c.push(['ej','EJ: '+F.ej]);if(F.core)c.push(['core','Core: '+F.core]);
+  $('#chips').innerHTML=c.map(function(x){return '<span class="chip">'+esc(x[1])+'<button type="button" data-k="'+x[0]+'" aria-label="Hapus filter '+esc(x[1])+'">×</button></span>'}).join('');
+  $('#chips').style.marginTop=c.length?'14px':'0';
+}
+
+/* ---------- hero + strip ---------- */
+function renderHero(){
+  var rows=filt(['akhir']),by=countBy(rows,function(r){return r.akhir}),T=rows.length,tot=sum(rows);
+  var keys=STATUS.concat(Object.keys(by).filter(function(k){return STATUS.indexOf(k)<0&&k}));
+  var sel=(by.Selesai||{n:0}).n,bel=(by.Belum||{n:0}).n,pro=(by.Proses||{n:0}).n;
+  var h=$('#heroH'),lead=$('#heroLead');
+  if(!T){h.textContent='Tidak ada transaksi yang cocok dengan filter.';lead.textContent='Ubah atau reset filter untuk melihat data kembali.';$('#heroBar').innerHTML='';$('#heroTot').innerHTML='';$('#heroLeg').innerHTML=STATUS.map(function(k){return '<button type="button" data-s="'+k+'" aria-pressed="false"><span class="nm"><i style="background:'+scol(k)+'"></i>'+k+'</span><span class="vl">Rp 0</span><span class="rp">0 transaksi</span></button>'}).join('');return}
+  if(sel===T)h.textContent='Seluruh '+NF.format(T)+' transaksi sudah selesai ditangani.';
+  else h.textContent=NF.format(sel)+' dari '+NF.format(T)+' transaksi selisih sudah selesai; '+NF.format(bel)+' belum ditangani'+(pro?' dan '+NF.format(pro)+' masih diproses':'')+'.';
+  var selSum=(by.Selesai||{sum:0}).sum;
+  lead.textContent='Tingkat penyelesaian '+pct(sel,T)+'% menurut jumlah transaksi dan '+pct(selSum,tot)+'% menurut nominal, dari total '+rp(tot)+'.';
+  var bar='',leg='',any=F.akhir.size>0;
+  keys.forEach(function(k){var d=by[k]||{n:0,sum:0};
+    if(d.n)bar+='<button type="button" class="sg'+(any&&!F.akhir.has(k)?' dim':'')+'" data-s="'+esc(k)+'" style="flex:'+d.n+' 1 0;background:'+scol(k)+';color:'+(SON[k]||'#fff')+'" aria-label="'+esc(k)+': '+d.n+' transaksi">'+(d.n/T>=.05?d.n:'')+'</button>';
+    leg+='<button type="button" data-s="'+esc(k)+'" aria-pressed="'+F.akhir.has(k)+'"><span class="nm"><i style="background:'+scol(k)+'"></i>'+esc(k)+'</span><span class="vl">'+rp(d.sum)+'</span><span class="rp">'+NF.format(d.n)+' transaksi · '+pct(d.n,T)+'% jumlah · '+pct(d.sum,tot)+'% nominal</span></button>'});
+  var shown=0,shownN=0;keys.forEach(function(k){if(by[k]){shown+=by[k].sum;shownN+=by[k].n}});
+  $('#heroTot').innerHTML='<span class="l">Total nominal semua status (Selesai + Proses + Belum)</span><span class="v">'+rp(shown)+'<small>'+NF.format(shownN)+' transaksi</small></span>';
+  var b=$('#heroBar');b.className='bar'+(firstRender?' anim':'');b.innerHTML=bar;$('#heroLeg').innerHTML=leg;
+}
+function renderStrip(){
+  var rows=filt([]),T=rows.length,tot=sum(rows);
+  var ids=countBy(rows,function(r){return r.id}),idk=Object.keys(ids).sort(function(a,b){return ids[b].n-ids[a].n});
+  var open=rows.filter(function(r){return r.akhir!=='Selesai'}),sus=rows.filter(function(r){return r.tx==='Suspect'});
+  var risk=rows.filter(function(r){return r.ej==='Failed'&&r.core==='Success'}),ret=rows.filter(function(r){return r.cash==='Retracted'});
+  var items=[
+    ['Total nominal',rpS(tot),T?'rata-rata '+rpS(tot/T)+' per transaksi':'—',''],
+    ['Terminal terlibat',NF.format(idk.length),idk.length?'terbanyak '+idk[0]+' ('+ids[idk[0]].n+' trx)':'—',''],
+    ['Belum selesai',rpS(sum(open)),NF.format(open.length)+' transaksi berstatus Belum atau Proses','alert'],
+    ['EJ gagal, Core sukses',NF.format(risk.length),rpS(sum(risk))+' berpotensi selisih',risk.length?'alert':''],
+    ['Cash retracted',NF.format(ret.length),rpS(sum(ret))+' uang tertarik kembali',''],
+    ['Status suspect',NF.format(sus.length),pct(sus.length,T)+'% dari transaksi','']];
+  $('#strip').innerHTML=items.map(function(i){return '<div class="st '+i[3]+'"><div class="l">'+i[0]+'</div><div class="v">'+i[1]+'</div><div class="n" title="'+esc(i[2])+'">'+esc(i[2])+'</div></div>'}).join('');
+}
+
+/* ---------- trend ---------- */
+function utc(iso){var p=iso.split('-');return Date.UTC(+p[0],+p[1]-1,+p[2])}
+function iso(ms){var d=new Date(ms);return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0')}
+function keyOf(i,g){if(g==='day')return i;if(g==='month')return i.slice(0,7)+'-01';var ms=utc(i),dow=(new Date(ms).getUTCDay()+6)%7;return iso(ms-dow*864e5)}
+function nextKey(k,g){var ms=utc(k);if(g==='day')return iso(ms+864e5);if(g==='week')return iso(ms+7*864e5);var d=new Date(ms);d.setUTCMonth(d.getUTCMonth()+1);return iso(d.getTime())}
+function lbl(k,g){var p=k.split('-');return g==='month'?MON[+p[1]-1]+' '+p[0].slice(2):+p[2]+' '+MON[+p[1]-1]}
+function niceStep(x){x=Math.max(1,x);var p=Math.pow(10,Math.floor(Math.log10(x))),m=x/p;return (m<=1?1:m<=2?2:m<=5?5:10)*p}
+var trendData=[];
+function renderGran(){
+  var opts=[['day','Harian'],['week','Mingguan'],['month','Bulanan']];
+  $('#gran').innerHTML=opts.map(function(o){return '<button type="button" data-g="'+o[0]+'" aria-pressed="'+(G===o[0])+'">'+o[1]+'</button>'}).join('');
+}
+function renderTrend(){
+  var el=$('#trend'),rows=filt([]).filter(function(r){return r.tgl});
+  var keysS=STATUS.concat(Array.from(new Set(rows.map(function(r){return r.akhir}))).filter(function(k){return k&&STATUS.indexOf(k)<0}));
+  $('#trendLeg').innerHTML=keysS.map(function(k){return '<span><i style="background:'+scol(k)+'"></i>'+esc(k)+'</span>'}).join('');
+  if(!rows.length){el.innerHTML='<div class="empty">Tidak ada data untuk ditampilkan.</div>';return}
+  var ds=rows.map(function(r){return r.tgl}).sort(),mn=ds[0],mx=ds[ds.length-1],g=G;
+  function build(gg){var arr=[],k=keyOf(mn,gg),end=keyOf(mx,gg),guard=0;while(k<=end&&guard++<2000){arr.push(k);k=nextKey(k,gg)}return arr}
+  var ks=build(g);if(g==='day'&&ks.length>130){g='week';G='week';renderGran();ks=build(g)}
+  var map={};ks.forEach(function(k){map[k]={key:k,label:lbl(k,g),c:{},n:0,sum:0}});
+  rows.forEach(function(r){var b=map[keyOf(r.tgl,g)];if(!b)return;b.c[r.akhir]=(b.c[r.akhir]||0)+1;b.n++;b.sum+=r.amt||0});
+  trendData=ks.map(function(k){return map[k]});
+  var mxN=Math.max.apply(null,trendData.map(function(b){return b.n})),step=niceStep(mxN/4),ymax=Math.max(step*2,Math.ceil(mxN/step)*step);
+  var W=Math.max(300,el.clientWidth||640),H=320,ml=34,mr=6,mt=10,mb=32,iw=W-ml-mr,ih=H-mt-mb,sw=iw/trendData.length,bw=Math.max(2,Math.min(44,sw*.74));
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Grafik batang tren transaksi per periode">';
+  for(var v=0;v<=ymax;v+=step){var y=mt+ih-(v/ymax)*ih;s+='<line x1="'+ml+'" x2="'+(W-mr)+'" y1="'+y+'" y2="'+y+'" style="stroke:var(--line)" stroke-dasharray="'+(v?'3 4':'0')+'"/><text x="'+(ml-8)+'" y="'+(y+4)+'" text-anchor="end" style="fill:var(--muted);font-size:11.5px">'+v+'</text>'}
+  var every=Math.max(1,Math.ceil(trendData.length/Math.max(2,Math.floor(iw/64))));
+  trendData.forEach(function(b,i){
+    var x=ml+i*sw+(sw-bw)/2,acc=0;
+    keysS.forEach(function(k){var c=b.c[k]||0;if(!c)return;var h=(c/ymax)*ih,y=mt+ih-acc-h;s+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,h-1).toFixed(1)+'" rx="2" style="fill:'+scol(k)+'"/>';acc+=h});
+    s+='<rect class="hit" data-i="'+i+'" x="'+(ml+i*sw).toFixed(1)+'" y="'+mt+'" width="'+sw.toFixed(1)+'" height="'+ih+'" style="fill:var(--ink);fill-opacity:0"/>';
+    if(i%every===0)s+='<text x="'+(ml+i*sw+sw/2).toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle" style="fill:var(--muted);font-size:11.5px">'+esc(b.label)+'</text>'});
+  s+='</svg>';el.innerHTML=s;
+  $('#trendSub').textContent='Jumlah transaksi per '+(g==='day'?'hari':g==='week'?'minggu (mulai Senin)':'bulan')+', dipecah menurut status akhir';
+}
+function trendTip(i,e){var b=trendData[i];if(!b)return;
+  var ks=Object.keys(b.c).sort(function(a,c){return STATUS.indexOf(a)-STATUS.indexOf(c)});
+  var h='<b>'+(G==='week'?'Minggu '+fD(b.key):G==='month'?lbl(b.key,'month'):fD(b.key))+'</b>';
+  h+='<div class="r"><span>Total</span><b>'+b.n+' trx</b></div>';
+  ks.forEach(function(k){h+='<div class="r"><span>'+esc(k)+'</span><span>'+b.c[k]+'</span></div>'});
+  h+='<div class="r"><span>Nominal</span><span>'+rpS(b.sum)+'</span></div>';showTip(h,e)}
+
+/* ---------- donut ---------- */
+var donutData=[];
+function renderDonut(){
+  var rows=filt(['tipe']),by=countBy(rows,tipeOf),ks=Object.keys(by).sort(function(a,b){return by[b].n-by[a].n}),T=rows.length;
+  donutData=ks.map(function(k,i){return {k:k,n:by[k].n,sum:by[k].sum,c:k==='Lainnya'?'var(--neutral)':SERIES[Math.min(i,4)]}});
+  if(!T){$('#donut').innerHTML='';$('#dleg').innerHTML='<div class="empty">Tidak ada data.</div>';return}
+  var R=66,C=2*Math.PI*R,acc=0,any=!!F.tipe;
+  var s='<svg width="176" height="176" viewBox="0 0 176 176" role="img" aria-label="Grafik donat tipe transaksi"><g transform="rotate(-90 88 88)"><circle cx="88" cy="88" r="'+R+'" fill="none" style="stroke:var(--surface-2)" stroke-width="24"/>';
+  donutData.forEach(function(d,i){var len=Math.max(0,d.n/T*C-(donutData.length>1?2.5:0));
+    s+='<circle class="ring" data-i="'+i+'" cx="88" cy="88" r="'+R+'" fill="none" stroke-width="24" style="stroke:'+d.c+';opacity:'+(any&&F.tipe!==d.k?.28:1)+'" stroke-dasharray="'+len.toFixed(2)+' '+(C-len).toFixed(2)+'" stroke-dashoffset="'+(-acc).toFixed(2)+'"/>';acc+=d.n/T*C});
+  s+='</g></svg><div class="ctr"><div><b>'+NF.format(T)+'</b><span>transaksi</span></div></div>';
+  $('#donut').innerHTML=s;
+  $('#dleg').innerHTML=donutData.map(function(d,i){return '<button type="button" data-k="'+esc(d.k)+'" aria-pressed="'+(F.tipe===d.k)+'"><i style="background:'+d.c+'"></i><span class="nm" title="'+esc(d.k)+'">'+esc(d.k)+'</span><span class="ct">'+d.n+'</span><span class="pc">'+pct(d.n,T)+'%</span></button>'}).join('');
+}
+
+/* ---------- matrix ---------- */
+function renderMatrix(){
+  var rows=filt(['mx']),E=['Success','Failed','Blank'],M={},mxv=1;
+  E.forEach(function(e){M[e]={};E.forEach(function(c){M[e][c]={n:0,sum:0}})});
+  rows.forEach(function(r){var e=E.indexOf(r.ej)>=0?r.ej:'Blank',c=E.indexOf(r.core)>=0?r.core:'Blank';M[e][c].n++;M[e][c].sum+=r.amt||0});
+  E.forEach(function(e){E.forEach(function(c){mxv=Math.max(mxv,M[e][c].n)})});
+  var h='<table class="mx" aria-label="Matriks status EJ terhadap Core"><thead><tr><th></th>'+E.map(function(c){return '<th scope="col">Core '+c+'</th>'}).join('')+'<th class="tot">Total</th></tr></thead><tbody>';
+  E.forEach(function(e){var rt=0;
+    h+='<tr><th class="rh" scope="row">EJ '+e+'</th>';
+    E.forEach(function(c){var d=M[e][c];rt+=d.n;var risk=(e==='Failed'&&c==='Success');
+      h+='<td><button type="button" class="'+(risk?'risk':'')+'" data-e="'+e+'" data-c="'+c+'" aria-pressed="'+(F.ej===e&&F.core===c)+'" style="--k:'+(d.n/mxv).toFixed(3)+'" title="'+d.n+' transaksi, '+rp(d.sum)+'">'+d.n+'<small>'+(d.n?rpS(d.sum):'—')+'</small></button></td>'});
+    h+='<td class="tot">'+rt+'</td></tr>'});
+  h+='</tbody></table><p class="note"><i></i><span>Kotak merah: Core mencatat transaksi sukses, tetapi EJ mencatat gagal. Kombinasi ini paling sering menjadi sumber selisih.</span></p>';
+  $('#matrix').innerHTML=h;
+}
+
+/* ---------- top terminals + buckets ---------- */
+function renderTop(){
+  var rows=filt(['terminal']),by=countBy(rows,function(r){return r.id}),names={};rows.forEach(function(r){names[r.id]=r.nama});
+  var ks=Object.keys(by).sort(function(a,b){return by[b].n-by[a].n||by[b].sum-by[a].sum||(a<b?-1:1)}).slice(0,10);
+  if(!ks.length){$('#topT').innerHTML='<div class="empty">Tidak ada data.</div>';return}
+  var mx=by[ks[0]].n;
+  $('#topT').innerHTML=ks.map(function(k){var st={};rows.forEach(function(r){if(r.id===k)st[r.akhir]=(st[r.akhir]||0)+1});
+    var seg=Object.keys(st).sort(function(a,b){return STATUS.indexOf(a)-STATUS.indexOf(b)}).map(function(s){return '<span style="width:'+(st[s]/mx*100).toFixed(2)+'%;background:'+scol(s)+'" title="'+esc(s)+': '+st[s]+'"></span>'}).join('');
+    return '<button type="button" data-id="'+esc(k)+'" aria-pressed="'+(F.terminal===k)+'"><span class="lbl"><div class="t1">'+esc(k)+'</div><div class="t2" title="'+esc(names[k])+'">'+esc(names[k])+'</div></span><span class="trk">'+seg+'</span><span class="num">'+by[k].n+' trx<small>'+rpS(by[k].sum)+'</small></span></button>'}).join('');
+}
+function renderBranches(){
+  var rows=filt(['branch']),by=countBy(rows,brOf),tm={};rows.forEach(function(r){(tm[brOf(r)]||(tm[brOf(r)]=new Set())).add(r.id)});
+  var ks=Object.keys(by).sort(function(a,b){return by[b].n-by[a].n||by[b].sum-by[a].sum||(a<b?-1:1)});
+  var more=Math.max(0,ks.length-10);ks=ks.slice(0,10);
+  $('#brSub').textContent=(more?'10 teratas dari '+(ks.length+more)+' branch':'Semua branch')+' · warna batang menunjukkan status akhir · klik untuk memilih branch';
+  if(!ks.length){$('#topB').innerHTML='<div class="empty">Tidak ada data.</div>';return}
+  var mx=by[ks[0]].n;
+  $('#topB').innerHTML=ks.map(function(k){var st={};rows.forEach(function(r){if(brOf(r)===k)st[r.akhir]=(st[r.akhir]||0)+1});
+    var seg=Object.keys(st).sort(function(a,b){return STATUS.indexOf(a)-STATUS.indexOf(b)}).map(function(x){return '<span style="width:'+(st[x]/mx*100).toFixed(2)+'%;background:'+scol(x)+'" title="'+esc(x)+': '+st[x]+'"></span>'}).join('');
+    return '<button type="button" data-b="'+esc(k)+'" aria-pressed="'+(F.branch===k)+'"><span class="lbl"><div class="t1">'+esc(k)+'</div><div class="t2">'+tm[k].size+' terminal</div></span><span class="trk">'+seg+'</span><span class="num">'+by[k].n+' trx<small>'+rpS(by[k].sum)+'</small></span></button>'}).join('');
+}
+function renderBuckets(){
+  var rows=filt([]),B=[['Rp 0',function(a){return a===0}],['Sampai Rp 100 rb',function(a){return a>0&&a<=1e5}],['Rp 100 rb – 500 rb',function(a){return a>1e5&&a<=5e5}],['Rp 500 rb – 1 jt',function(a){return a>5e5&&a<=1e6}],['Di atas Rp 1 jt',function(a){return a>1e6}]];
+  var cs=B.map(function(b){return rows.filter(function(r){return b[1](r.amt||0)}).length}),mx=Math.max.apply(null,cs.concat([1]));
+  $('#buckets').innerHTML=B.map(function(b,i){return '<div class="row"><span class="t1" style="font-weight:500;font-size:13.5px">'+b[0]+'</span><span class="trk"><span style="width:'+(cs[i]/mx*100)+'%"></span></span><span class="num">'+cs[i]+'</span></div>'}).join('');
+}
+
+/* ---------- table ---------- */
+var COLS=[
+  {k:'dt',l:'Tanggal & waktu',v:function(r){return (r.tgl||'')+' '+(r.jam||'')}},
+  {k:'id',l:'Terminal',v:function(r){return r.id}},
+  {k:'tipe',l:'Tipe transaksi',v:function(r){return r.tipe||''}},
+  {k:'amt',l:'Nominal',r:1,v:function(r){return r.amt||0}},
+  {k:'akhir',l:'Status akhir',v:function(r){return STATUS.indexOf(r.akhir)}},
+  {k:'tx',l:'Status TX',v:function(r){return r.tx}},
+  {k:'ej',l:'EJ',v:function(r){return r.ej}},
+  {k:'core',l:'Core',v:function(r){return r.core}},
+  {k:'cash',l:'Cash',v:function(r){return r.cash}},
+  {k:'resi',l:'Resi',r:1,v:function(r){return r.resi}}];
+var tableRows=[];
+function renderTable(){
+  var rows=filt([]),col=COLS.filter(function(c){return c.k===SORT.k})[0]||COLS[0];
+  rows=rows.slice().sort(function(a,b){var x=col.v(a),y=col.v(b);var c=(typeof x==='number'&&typeof y==='number')?x-y:String(x).localeCompare(String(y),'id');return c*SORT.d||(a.no-b.no)});
+  tableRows=rows;
+  $('#thead').innerHTML='<tr>'+COLS.map(function(c){var on=SORT.k===c.k;return '<th class="'+(c.r?'r':'')+'" aria-sort="'+(on?(SORT.d>0?'ascending':'descending'):'none')+'"><button type="button" data-k="'+c.k+'">'+c.l+'<span aria-hidden="true" style="opacity:'+(on?1:.3)+'">'+(on?(SORT.d>0?'▲':'▼'):'↕')+'</span></button></th>'}).join('')+'</tr>';
+  var T=rows.length,pages=Math.max(1,Math.ceil(T/PG.size));PG.page=Math.min(PG.page,pages);
+  var from=(PG.page-1)*PG.size,sl=rows.slice(from,from+PG.size);
+  $('#tbody').innerHTML=sl.length?sl.map(function(r,i){
+    return '<tr tabindex="0" data-i="'+(from+i)+'"><td><div>'+fDn(r.tgl)+'</div><div class="tm">'+esc(r.jam)+'</div></td><td><div class="t-id">'+esc(r.id)+' <span class="tm" style="font-weight:500">· '+esc(brOf(r))+'</span></div><div class="t-nm" title="'+esc(r.nama)+'">'+esc(r.nama)+'</div></td><td>'+esc(r.tipe||'—')+'</td><td class="r">'+rp(r.amt||0)+'</td><td><span class="pill '+(SPILL[r.akhir]||'neutral')+'">'+esc(r.akhir||'—')+'</span></td><td><span class="dot '+dotCls(r.tx)+'">'+esc(r.tx||'—')+'</span></td><td><span class="dot '+dotCls(r.ej)+'">'+esc(r.ej||'—')+'</span></td><td><span class="dot '+dotCls(r.core)+'">'+esc(r.core||'—')+'</span></td><td><span class="dot '+dotCls(r.cash)+'">'+esc(r.cash||'—')+'</span></td><td style="font-variant-numeric:tabular-nums">'+esc(r.resi)+'</td></tr>'}).join(''):'<tr><td colspan="'+COLS.length+'"><div class="empty">Tidak ada transaksi yang cocok. Ubah atau reset filter.</div></td></tr>';
+  var bs=countBy(rows,function(r){return r.akhir});
+  $('#tfoot').innerHTML=T?'<tr><td colspan="3">Total '+NF.format(T)+' transaksi (semua halaman)</td><td class="r" style="text-align:right">'+rp(sum(rows))+'</td><td colspan="6" class="sm">'+STATUS.map(function(k){return k+' <b>'+rp((bs[k]||{sum:0}).sum)+'</b>'}).join(' &nbsp;·&nbsp; ')+'</td></tr>':'';
+  $('#tblSub').textContent=NF.format(T)+' transaksi · total '+rp(sum(rows))+' · klik baris untuk melihat detail';
+  $('#pgInfo').textContent=T?('Menampilkan '+(from+1)+'–'+Math.min(from+PG.size,T)+' dari '+NF.format(T)+' transaksi'):'0 transaksi';
+  $('#pgNum').textContent='Hal. '+PG.page+' / '+pages;
+  $('#pgPrev').disabled=PG.page<=1;$('#pgNext').disabled=PG.page>=pages;
+}
+
+/* ---------- drawer ---------- */
+var lastFocus=null;
+function openDrawer(r){
+  lastFocus=document.activeElement;
+  $('#drTitle').textContent=r.id+' · '+(r.tipe||'Transaksi');
+  $('#drSub').textContent=r.nama+' — '+fD(r.tgl)+', '+r.jam;
+  function kv(a){return '<dl class="kv">'+a.map(function(x){return '<dt>'+x[0]+'</dt><dd>'+(x[1]===''||x[1]==null?'—':x[1])+'</dd>'}).join('')+'</dl>'}
+  var pill=function(s){return '<span class="pill '+(SPILL[s]||'neutral')+'">'+esc(s||'—')+'</span>'};
+  var dot=function(s){return '<span class="dot '+dotCls(s)+'">'+esc(s||'—')+'</span>'};
+  $('#drBody').innerHTML='<h4>Status penyelesaian</h4>'+kv([['Status akhir',pill(r.akhir)],['Status TX',dot(r.tx)],['EJ',dot(r.ej)],['Core',dot(r.core)],['Cash status',dot(r.cash)],['Status message',esc(r.statMsg)]])+
+   '<h4>Transaksi</h4>'+kv([['No.',r.no],['Branch ID',esc(brOf(r))],['ATM ID',esc(r.id)],['Nama ATM',esc(r.nama)],['Tanggal',fDn(r.tgl)],['Waktu',esc(r.jam)],['Tipe',esc(r.tipe)],['Nominal','<b>'+rp(r.amt||0)+'</b>'],['Resi number',esc(r.resi)]])+
+   '<h4>Rekening dan kartu</h4>'+kv([['No. rekening',esc(r.acc)],['No. kartu',esc(r.kartu)]])+
+   '<h4>Respon</h4>'+kv([['Respon kode',esc(r.rc)],['Pesan',esc(r.msg)],['Cash message',esc(r.cashMsg)],['Core RC',esc(r.coreRc)]])+
+   '<h4>Referensi core</h4>'+kv([['TRKEY',esc(r.trkey)],['FT',esc(r.ft)]]);
+  $('#scrim').hidden=false;var d=$('#drawer');d.classList.add('open');d.setAttribute('aria-hidden','false');$('#drClose').focus();
+}
+function closeDrawer(){$('#drawer').classList.remove('open');$('#drawer').setAttribute('aria-hidden','true');if(!$('#modal').hidden)return;$('#scrim').hidden=true;if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+
+/* ---------- render all ---------- */
+function renderAll(full){
+  if(full){renderTerminalSelect();renderHeader()}
+  renderAkhirChips();renderChips();renderHero();renderStrip();renderGran();renderTrend();renderDonut();renderMatrix();renderBranches();renderTop();renderBuckets();renderTable();
+  var f=filt([]).length;$('#expF').textContent=NF.format(f)+' baris';$('#expA').textContent=NF.format(DATA.length)+' baris';
+  firstRender=false;
+}
+function syncInputs(){$('#fBranch').value=F.branch;renderTermSelect();$('#fTerm').value=F.terminal;$('#fTipe').value=F.tipe;$('#fFrom').value=F.from;$('#fTo').value=F.to;$('#fQ').value=F.q}
+function refresh(){PG.page=1;renderAll(false)}
+
+/* ---------- events ---------- */
+$('#fBranch').addEventListener('change',function(){F.branch=this.value;F.terminal='';renderTermSelect();refresh()});
+$('#fTerm').addEventListener('change',function(){F.terminal=this.value;refresh()});
+$('#fTipe').addEventListener('change',function(){F.tipe=this.value;refresh()});
+$('#fFrom').addEventListener('change',function(){F.from=this.value;refresh()});
+$('#fTo').addEventListener('change',function(){F.to=this.value;refresh()});
+var qT;$('#fQ').addEventListener('input',function(){var v=this.value;clearTimeout(qT);qT=setTimeout(function(){F.q=v;refresh()},180)});
+$('#fReset').addEventListener('click',function(){F={branch:'',terminal:'',akhir:new Set(),tipe:'',from:'',to:'',q:'',ej:'',core:''};syncInputs();refresh()});
+function toggleAkhir(s){if(!s){F.akhir.clear()}else if(F.akhir.has(s)){F.akhir.delete(s)}else{F.akhir.add(s)}refresh()}
+$('#fAkhir').addEventListener('click',function(e){var b=e.target.closest('button');if(b)toggleAkhir(b.dataset.s)});
+$('#heroBar').addEventListener('click',function(e){var b=e.target.closest('button');if(b)toggleAkhir(b.dataset.s)});
+$('#heroLeg').addEventListener('click',function(e){var b=e.target.closest('button');if(b)toggleAkhir(b.dataset.s)});
+$('#chips').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;F[b.dataset.k]='';refresh()});
+$('#gran').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;G=b.dataset.g;renderGran();renderTrend()});
+$('#dleg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;F.tipe=F.tipe===b.dataset.k?'':b.dataset.k;syncInputs();refresh()});
+$('#donut').addEventListener('click',function(e){var c=e.target.closest('.ring');if(!c)return;var k=donutData[+c.dataset.i].k;F.tipe=F.tipe===k?'':k;syncInputs();refresh()});
+$('#matrix').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var on=F.ej===b.dataset.e&&F.core===b.dataset.c;F.ej=on?'':b.dataset.e;F.core=on?'':b.dataset.c;refresh()});
+$('#topB').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var on=F.branch===b.dataset.b;F.branch=on?'':b.dataset.b;F.terminal='';syncInputs();refresh()});
+$('#topT').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;F.terminal=F.terminal===b.dataset.id?'':b.dataset.id;syncInputs();refresh()});
+$('#thead').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var k=b.dataset.k;if(SORT.k===k)SORT.d*=-1;else{SORT.k=k;SORT.d=(k==='dt'||k==='amt')?-1:1}PG.page=1;renderTable()});
+$('#tbody').addEventListener('click',function(e){var tr=e.target.closest('tr[data-i]');if(tr)openDrawer(tableRows[+tr.dataset.i])});
+$('#tbody').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){var tr=e.target.closest('tr[data-i]');if(tr){e.preventDefault();openDrawer(tableRows[+tr.dataset.i])}}});
+$('#pgSize').addEventListener('change',function(){PG.size=+this.value;PG.page=1;renderTable()});
+$('#pgPrev').addEventListener('click',function(){PG.page--;renderTable()});
+$('#pgNext').addEventListener('click',function(){PG.page++;renderTable()});
+$('#drClose').addEventListener('click',closeDrawer);
+$('#scrim').addEventListener('click',function(){if(!$('#modal').hidden)closeModal();closeDrawer()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(!$('#modal').hidden)closeModal();else if($('#drawer').classList.contains('open'))closeDrawer();closeMenu()}});
+
+/* chart tooltips */
+$('#trend').addEventListener('pointermove',function(e){var h=e.target.closest('.hit');if(h){h.style.fillOpacity=.06;trendTip(+h.dataset.i,e)}else hideTip()});
+$('#trend').addEventListener('pointerover',function(e){$$('.hit',this).forEach(function(x){x.style.fillOpacity=0})});
+$('#trend').addEventListener('pointerleave',function(){hideTip();$$('.hit',this).forEach(function(x){x.style.fillOpacity=0})});
+$('#trend').addEventListener('pointerout',function(e){var h=e.target.closest('.hit');if(h)h.style.fillOpacity=0});
+$('#donut').addEventListener('pointermove',function(e){var c=e.target.closest('.ring');if(!c){hideTip();return}var d=donutData[+c.dataset.i];showTip('<b>'+esc(d.k)+'</b><div class="r"><span>Transaksi</span><span>'+d.n+'</span></div><div class="r"><span>Nominal</span><span>'+rpS(d.sum)+'</span></div>',e)});
+$('#donut').addEventListener('pointerleave',hideTip);
+if(window.ResizeObserver){var lastW=0,rt;new ResizeObserver(function(en){var w=Math.round(en[0].contentRect.width);if(w&&Math.abs(w-lastW)>2){lastW=w;clearTimeout(rt);rt=setTimeout(renderTrend,80)}}).observe($('#trend'))}
+
+/* theme */
+function applyTheme(t){if(t)document.documentElement.setAttribute('data-theme',t)}
+try{applyTheme(localStorage.getItem(THEME))}catch(e){}
+$('#btnTheme').addEventListener('click',function(){
+  var cur=document.documentElement.getAttribute('data-theme'),dark=cur?cur==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  var n=dark?'light':'dark';applyTheme(n);try{localStorage.setItem(THEME,n)}catch(e){}});
+
+/* ---------- Upload ---------- */
+var LAYOUT=['no','id','nama','akhir','tx','ej','core','cash','tgl','jam','resi','acc','kartu','amt','tipe','cashMsg','rc','msg','statMsg','coreRc','trkey','ft'];
+var CANON={akhir:['Selesai','Proses','Belum'],tx:['Normal','Suspect','Abnormal'],ej:['Success','Failed','Blank'],core:['Success','Failed','Blank'],cash:['Taken','Retracted','Blank']};
+function canon(v,k){v=String(v==null?'':v).trim();var l=CANON[k];if(!l||!v)return v;var f=l.filter(function(x){return x.toLowerCase()===v.toLowerCase()})[0];return f||v}
+function pad(n){return String(n).padStart(2,'0')}
+function parseDate(v){
+  if(v instanceof Date&&!isNaN(v)){var d=new Date(v.getTime()+60000);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+  if(typeof v==='number'&&v>20000&&window.XLSX){var p=XLSX.SSF.parse_date_code(v);if(p)return p.y+'-'+pad(p.m)+'-'+pad(p.d)}
+  var s=String(v==null?'':v).trim(),m;
+  if((m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/))){var y=+m[3];if(y<100)y+=2000;return y+'-'+pad(+m[2])+'-'+pad(+m[1])}
+  if((m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)))return m[1]+'-'+pad(+m[2])+'-'+pad(+m[3]);
+  return ''}
+function parseTime(v){
+  if(v instanceof Date&&!isNaN(v)){var d=new Date(v.getTime()+500);return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())}
+  if(typeof v==='number'){var t=Math.round((v%1)*86400);return pad(Math.floor(t/3600))+':'+pad(Math.floor(t%3600/60))+':'+pad(t%60)}
+  return String(v==null?'':v).trim()}
+function parseNum(v){if(typeof v==='number')return Math.round(v);var s=String(v==null?'':v).replace(/[^\d\-]/g,'');return s&&s!=='-'?parseInt(s,10):0}
+function parseSheet(aoa){
+  var hdr=-1,idx=-1;
+  for(var i=0;i<aoa.length&&hdr<0;i++){var row=aoa[i];for(var j=0;j<row.length;j++){if(String(row[j]).trim().toLowerCase()==='atm id'&&String(row[j+1]).trim().toLowerCase()==='nama atm'){hdr=i;idx=j;break}}}
+  if(hdr<0)return null;
+  var out=[];
+  for(var r=hdr+1;r<aoa.length;r++){var row=aoa[r];var id=String(row[idx]==null?'':row[idx]).trim();
+    if(!/^[A-Za-z0-9]{5,14}$/.test(id)||!/\d/.test(id)||id.toLowerCase()==='atm id')continue;
+    var o={};LAYOUT.forEach(function(k,n){var v=row[idx+n-1];if(idx+n-1<0)v='';
+      if(k==='tgl')o[k]=parseDate(v);else if(k==='jam')o[k]=parseTime(v);else if(k==='amt')o[k]=parseNum(v);else if(k==='resi'||k==='no'){var q=parseNum(v);o[k]=(v===''||v==null)?(k==='resi'?0:0):q}
+      else o[k]=canon(v,k)});
+    out.push(o)}
+  return out}
+function rowKey(o){return o.trkey||[o.id,o.tgl,o.jam,o.resi,o.acc,o.amt].join('|')}
+var pending=null;
+function openModal(){$('#scrim').hidden=false;$('#modal').hidden=false;$('#mAdd').focus()}
+function closeModal(){$('#modal').hidden=true;pending=null;if(!$('#drawer').classList.contains('open'))$('#scrim').hidden=true}
+async function handleFile(file){
+  if(!file)return;
+  if(!window.XLSX){toast('Pustaka Excel belum termuat. Periksa koneksi internet lalu muat ulang halaman.',true);return}
+  if(!/\.(xlsx|xls|csv)$/i.test(file.name)){toast('Format file tidak didukung. Gunakan .xlsx, .xls, atau .csv.',true);return}
+  try{
+    var buf=await file.arrayBuffer(),wb=XLSX.read(buf,{type:'array',cellDates:true}),rows=null;
+    for(var i=0;i<wb.SheetNames.length&&!rows;i++){var aoa=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[i]],{header:1,raw:true,defval:'',blankrows:false});rows=parseSheet(aoa)}
+    if(!rows){toast('Kolom tidak dikenali. Header harus memuat "ATM ID" dan "Nama ATM" seperti pada laporan awal.',true);return}
+    if(!rows.length){toast('Tidak ada baris transaksi yang terbaca dari file ini.',true);return}
+    var have=new Set(DATA.map(rowKey)),fresh=[],dup=0;
+    rows.forEach(function(o){var k=rowKey(o);if(have.has(k))dup++;else{have.add(k);fresh.push(o)}});
+    pending={name:file.name,rows:rows,fresh:fresh,dup:dup};
+    $('#mFile').textContent=file.name;$('#mRead').textContent=NF.format(rows.length);$('#mNew').textContent=NF.format(fresh.length);$('#mDup').textContent=NF.format(dup);
+    $('#mAdd').textContent=fresh.length?'Tambahkan '+NF.format(fresh.length)+' baris baru':'Tidak ada baris baru';$('#mAdd').disabled=!fresh.length;$('#mAdd').style.opacity=fresh.length?1:.5;
+    openModal();
+  }catch(err){toast('File tidak dapat dibaca. Pastikan file Excel tidak rusak atau terkunci kata sandi.',true)}
+}
+function stamp(){var d=new Date();return d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear()+', '+pad(d.getHours())+':'+pad(d.getMinutes())}
+function commit(rows,msg,name){DATA=rows;DATA.forEach(function(r,i){r.no=i+1});META={source:name,modified:true,updated:stamp()};persist();closeModal();syncInputs();renderAll(true);toast(msg)}
+$('#mAdd').addEventListener('click',function(){if(!pending||!pending.fresh.length)return;var n=pending.fresh.length;commit(DATA.concat(pending.fresh),'Upload selesai: '+NF.format(n)+' baris ditambahkan.',META.source.indexOf('+')>=0?META.source:META.source+' + '+pending.name)});
+$('#mReplace').addEventListener('click',function(){if(!pending)return;var n=pending.rows.length,nm=pending.name;commit(pending.rows.slice(),'Upload selesai: data diganti dengan '+NF.format(n)+' baris.',nm)});
+$('#mCancel').addEventListener('click',closeModal);
+$('#btnUpload').addEventListener('click',function(){$('#file').click()});
+$('#file').addEventListener('change',function(){var f=this.files&&this.files[0];this.value='';handleFile(f)});
+$('#resetData').addEventListener('click',function(){DATA=RAW.map(function(r){return Object.assign({},r)});META={source:'DATA_TRX_GGL_SMPAI_27_SEP_2026.xlsx',modified:false,updated:''};try{localStorage.removeItem(STORE)}catch(e){}F={branch:'',terminal:'',akhir:new Set(),tipe:'',from:'',to:'',q:'',ej:'',core:''};syncInputs();renderAll(true);toast('Data dikembalikan ke file awal.')});
+var dragC=0;
+window.addEventListener('dragenter',function(e){if(e.dataTransfer&&Array.prototype.indexOf.call(e.dataTransfer.types||[],'Files')>=0){e.preventDefault();dragC++;$('#drop').hidden=false}});
+window.addEventListener('dragover',function(e){if($('#drop').hidden===false)e.preventDefault()});
+window.addEventListener('dragleave',function(){dragC=Math.max(0,dragC-1);if(!dragC)$('#drop').hidden=true});
+window.addEventListener('drop',function(e){if($('#drop').hidden)return;e.preventDefault();dragC=0;$('#drop').hidden=true;handleFile(e.dataTransfer.files&&e.dataTransfer.files[0])});
+
+/* ---------- Export ---------- */
+function closeMenu(){$('#expMenu').hidden=true;$('#btnExport').setAttribute('aria-expanded','false')}
+$('#btnExport').addEventListener('click',function(e){e.stopPropagation();var m=$('#expMenu');m.hidden=!m.hidden;this.setAttribute('aria-expanded',String(!m.hidden))});
+document.addEventListener('click',function(e){if(!e.target.closest('#expMenu'))closeMenu()});
+$('#expMenu').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;closeMenu();exportXlsx(b.dataset.exp)});
+function serial(iso){if(!iso)return '';var p=iso.split('-');return Math.round(Date.UTC(+p[0],+p[1]-1,+p[2])/864e5)+25569}
+function describeFilter(){var a=[];if(F.branch)a.push('Branch '+F.branch);if(F.terminal)a.push('Terminal '+F.terminal);if(F.akhir.size)a.push('Status akhir '+Array.from(F.akhir).join('/'));if(F.tipe)a.push('Tipe '+F.tipe);if(F.from)a.push('Dari '+fDn(F.from));if(F.to)a.push('Sampai '+fDn(F.to));if(F.ej)a.push('EJ '+F.ej);if(F.core)a.push('Core '+F.core);if(F.q.trim())a.push('Cari "'+F.q.trim()+'"');return a.length?a.join('; '):'Tanpa filter'}
+async function exportXlsx(scope){
+  if(!window.XLSX){toast('Pustaka Excel belum termuat. Periksa koneksi internet lalu muat ulang halaman.',true);return}
+  var rows=scope==='all'?DATA.slice():tableRows.slice();
+  if(scope!=='all'&&!rows.length){toast('Tidak ada data pada filter ini untuk diekspor.',true);return}
+  if(scope!=='all'){rows=filt([]).sort(function(a,b){return (a.tgl+a.jam)<(b.tgl+b.jam)?-1:1})}
+  var head=['No','ATM ID','Nama ATM','Status Akhir','Status TX','Status RC EJ','Status RC Core','Cash Status','Tanggal Transaksi','Waktu Transaksi','Resi Number','No. Acc','No. Kartu','Angka Amount','Tipe Transaksi','Cash Message','Respon Kode','Message','Status Message','Core RC','TRKEY','FT'];
+  var aoa=[['LAPORAN DATA PAGELAPORANPENYELESAIANSELISIH'],['Diekspor '+stamp()+' — '+describeFilter()],[],head];
+  rows.forEach(function(r,i){aoa.push(LAYOUT.map(function(k){if(k==='no')return i+1;if(k==='tgl')return r.tgl?{t:'n',v:serial(r.tgl),z:'dd/mm/yyyy'}:'';if(k==='amt')return {t:'n',v:r.amt||0,z:'#,##0'};if(k==='resi')return {t:'n',v:r.resi||0,z:'0'};return r[k]==null?'':r[k]}))});
+  var ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[6,11,30,12,11,12,13,12,17,15,12,14,20,15,24,18,12,38,16,9,40,16].map(function(w){return {wch:w}});
+  ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:3,c:0},e:{r:3+rows.length,c:21}})};
+  /* ringkasan */
+  var RNG=function(c){return "'Data Transaksi'!$"+c+'$5:$'+c+'$'+Math.max(5,4+rows.length)};
+  var T=rows.length,tot=sum(rows),sa=[['Ringkasan Dasbor Selisih Transaksi ATM/CRM'],['Diekspor',stamp()],['Cakupan',describeFilter()],[],['Total transaksi',{t:'n',f:'COUNTA('+RNG('D')+')',v:T}],['Total nominal (Rp)',{t:'n',f:'SUM('+RNG('N')+')',v:tot,z:'#,##0'}],['Terminal terlibat',new Set(rows.map(function(r){return r.id})).size],[],['Status Akhir','Jumlah','Nominal (Rp)','Persen']];
+  var by=countBy(rows,function(r){return r.akhir||'-'});var sk=STATUS.concat(Object.keys(by).filter(function(k){return STATUS.indexOf(k)<0})),r1=sa.length+1;
+  sk.forEach(function(k){var n=(by[k]||{n:0}).n,sm=(by[k]||{sum:0}).sum,rn=sa.length+1;sa.push([k,{t:'n',f:'COUNTIF('+RNG('D')+',A'+rn+')',v:n},{t:'n',f:'SUMIF('+RNG('D')+',A'+rn+','+RNG('N')+')',v:sm,z:'#,##0'},{t:'n',f:'IF($B$5=0,0,B'+rn+'/$B$5)',v:T?n/T:0,z:'0.0%'}])});
+  var r2=sa.length;sa.push(['Total',{t:'n',f:'SUM(B'+r1+':B'+r2+')',v:T},{t:'n',f:'SUM(C'+r1+':C'+r2+')',v:tot,z:'#,##0'},{t:'n',f:'SUM(D'+r1+':D'+r2+')',v:T?1:0,z:'0.0%'}]);
+  sa.push([],['Tipe Transaksi','Jumlah','Nominal (Rp)','Persen']);var bt=countBy(rows,tipeOf);Object.keys(bt).sort(function(a,b){return bt[b].n-bt[a].n}).forEach(function(k){sa.push([k,bt[k].n,bt[k].sum,T?bt[k].n/T:0])});
+  sa.push([],['EJ \\ Core','Success','Failed','Blank']);['Success','Failed','Blank'].forEach(function(e){sa.push(['EJ '+e].concat(['Success','Failed','Blank'].map(function(c){return rows.filter(function(r){return (r.ej||'Blank')===e&&(r.core||'Blank')===c}).length})))});
+  var ss=XLSX.utils.aoa_to_sheet(sa);ss['!cols']=[{wch:30},{wch:16},{wch:18},{wch:12}];
+  /* per terminal */
+  var bi=countBy(rows,function(r){return r.id}),nm={};rows.forEach(function(r){nm[r.id]=r.nama});
+  var ta=[['Branch ID','ATM ID','Nama ATM','Jumlah Transaksi','Total Nominal (Rp)','Selesai','Proses','Belum','Suspect']];
+  Object.keys(bi).sort(function(a,b){return bi[b].n-bi[a].n||(a<b?-1:1)}).forEach(function(k){var rr=rows.filter(function(r){return r.id===k});ta.push([k.slice(0,5).toUpperCase(),k,nm[k],bi[k].n,bi[k].sum,rr.filter(function(r){return r.akhir==='Selesai'}).length,rr.filter(function(r){return r.akhir==='Proses'}).length,rr.filter(function(r){return r.akhir==='Belum'}).length,rr.filter(function(r){return r.tx==='Suspect'}).length])});
+  var ts=XLSX.utils.aoa_to_sheet(ta);ts['!cols']=[{wch:11},{wch:12},{wch:34},{wch:18},{wch:20},{wch:10},{wch:10},{wch:10},{wch:10}];
+  var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data Transaksi');XLSX.utils.book_append_sheet(wb,ss,'Ringkasan');var ba=[['Branch ID','Jumlah Terminal','Jumlah Transaksi','Total Nominal (Rp)','Selesai','Proses','Belum','Suspect']],bm=countBy(rows,brOf);
+  Object.keys(bm).sort(function(a,b){return bm[b].n-bm[a].n||(a<b?-1:1)}).forEach(function(k){var rr=rows.filter(function(r){return brOf(r)===k});ba.push([k,new Set(rr.map(function(r){return r.id})).size,bm[k].n,bm[k].sum,rr.filter(function(r){return r.akhir==='Selesai'}).length,rr.filter(function(r){return r.akhir==='Proses'}).length,rr.filter(function(r){return r.akhir==='Belum'}).length,rr.filter(function(r){return r.tx==='Suspect'}).length])});
+  var bs=XLSX.utils.aoa_to_sheet(ba);bs['!cols']=[{wch:11},{wch:16},{wch:17},{wch:19},{wch:10},{wch:10},{wch:10},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,bs,'Per Branch');XLSX.utils.book_append_sheet(wb,ts,'Per Terminal');
+  var d=new Date(),ymd=d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
+  var name='Dashboard_TRX_'+(scope==='all'?'SEMUA':(F.terminal||F.branch||'FILTER'))+'_'+ymd+'.xlsx';
+  var buf;try{buf=XLSX.write(wb,{bookType:'xlsx',type:'array'})}catch(e){toast('Gagal membuat file Excel.',true);return}
+  var dl=null;try{if(window.claude&&window.claude.use)dl=await window.claude.use('downloads')}catch(e){}
+  if(dl){try{await dl.save({filename:name,data:buf});toast('Export selesai: '+name)}catch(e){if(e&&e.code==='declined')return;toast('Export gagal'+(e&&e.code?' ('+e.code+')':'')+'. Coba lagi.',true)}return}
+  try{var blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);toast('Export selesai: '+name)}catch(e){toast('Export gagal. Buka dasbor di tab baru lalu coba lagi.',true)}
+}
+
+/* ---------- init ---------- */
+renderAll(true);
+})();
+</script>
+</body>
+</html>
